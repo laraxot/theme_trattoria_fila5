@@ -1,4 +1,42 @@
-<x-layouts.app title="Trattoria · cucina italiana">
-    <section class="hero"><div class="container"><p class="eyebrow" style="color:#f4d9a9">Cucina italiana contemporanea</p><h1>Il gusto di stare insieme.</h1><p>Scopri il menu, prenota il tuo tavolo oppure scegli come ricevere il tuo ordine. Un'esperienza semplice da ogni dispositivo.</p><div class="actions"><a class="button" href="{{ url('/menu') }}">Scopri il menu</a><a class="button ghost" style="color:#fff;border-color:#ffffff66" href="{{ url('/prenota') }}">Prenota un tavolo</a></div></div></section>
-    <section class="section"><div class="container"><p class="eyebrow">Scegli la tua esperienza</p><h2>Come possiamo servirti?</h2><p class="lead">Prenota in anticipo o ordina quando sei pronto. Il percorso è ottimizzato per lo smartphone.</p><div class="cards" style="margin-top:1.5rem"><a class="card" href="{{ url('/prenota') }}"><span class="eyebrow">01</span><h3>Un tavolo per te</h3><p>Indicaci giorno, orario e numero di persone. Ti aspettiamo in sala.</p></a><a class="card" href="{{ url('/ordine?mode=takeaway') }}"><span class="eyebrow">02</span><h3>Da asporto</h3><p>Scegli i tuoi piatti e passa a ritirarli all'orario preferito.</p></a><a class="card" href="{{ url('/ordine?mode=dine_in') }}"><span class="eyebrow">03</span><h3>Servizio al tavolo</h3><p>Ordina dal tavolo e lascia che pensiamo noi al resto.</p></a></div></div></section>
+<x-layouts.app :title="__('pub_theme::home.title')" :description="__('pub_theme::home.description')">
+    <section class="hero">
+        <div class="container hero__grid">
+            <div class="hero__copy">
+                <h1>{{ __('pub_theme::home.title') }}</h1>
+                <p class="hero__lead">{{ __('pub_theme::home.lead') }}</p>
+                <div class="actions">
+                    <a class="button button--ghost" href="{{ route('container0.index', ['container0' => 'menu']) }}">{{ __('pub_theme::home.discover_menu') }}</a>
+                    <a class="button button--secondary" href="{{ route('container0.index', ['container0' => 'prenota']) }}">{{ __('pub_theme::home.book_table') }}</a>
+                </div>
+            </div>
+            <aside class="hero__aside" aria-label="{{ __('pub_theme::home.today_in_room') }}">
+                <p class="hero__aside-label">{{ __('pub_theme::home.today_in_room') }}</p>
+                <p class="hero__aside-time">{{ __('pub_theme::home.hours') }}<span>—</span>23:00</p>
+                <p class="hero__aside-note">{{ __('pub_theme::home.kitchen_open_until') }}<br>{{ config('app.restaurant_address', 'Via della Tavola, 12') }}</p>
+            </aside>
+        </div>
+    </section>
+    <section class="section">
+        <div class="container">
+            <h2>{{ __('pub_theme::home.how_can_we_serve_you') }}</h2>
+            <p class="lead">{{ __('pub_theme::home.book_or_order') }}</p>
+            <div class="cards" style="margin-top:1.5rem">
+                <a class="card" href="{{ route('container0.index', ['container0' => 'prenota']) }}">
+                    <h3>{{ __('pub_theme::home.card_table.title') }}</h3>
+                    <p>{{ __('pub_theme::home.card_table.description') }}</p>
+                    <span class="card__action">{{ __('pub_theme::home.card_table.action') }}</span>
+                </a>
+                <a class="card" href="{{ route('container0.index', ['container0' => 'ordine', 'mode' => 'takeaway']) }}">
+                    <h3>{{ __('pub_theme::home.card_takeaway.title') }}</h3>
+                    <p>{{ __('pub_theme::home.card_takeaway.description') }}</p>
+                    <span class="card__action">{{ __('pub_theme::home.card_takeaway.action') }}</span>
+                </a>
+                <a class="card" href="{{ route('container0.index', ['container0' => 'ordine', 'mode' => 'dine_in']) }}">
+                    <h3>{{ __('pub_theme::home.card_dine_in.title') }}</h3>
+                    <p>{{ __('pub_theme::home.card_dine_in.description') }}</p>
+                    <span class="card__action">{{ __('pub_theme::home.card_dine_in.action') }}</span>
+                </a>
+            </div>
+        </div>
+    </section>
 </x-layouts.app>

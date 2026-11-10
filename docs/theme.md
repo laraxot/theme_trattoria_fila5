@@ -73,8 +73,8 @@ Esempio reale (da `resources/views/pages/index.blade.php`):
     <p class="eyebrow">Cucina italiana contemporanea</p>
     <h1>Il gusto di stare insieme.</h1>
     <div class="actions">
-      <a class="button" href="{{ url('/menu') }}">Scopri il menu</a>
-      <a class="button ghost" href="{{ url('/prenota') }}">Prenota un tavolo</a>
+      <a class="button" href="{{ route('container0.index', ['container0' => 'menu']) }}">Scopri il menu</a>
+      <a class="button button--ghost" href="{{ route('container0.index', ['container0' => 'prenota']) }}">Prenota un tavolo</a>
     </div>
   </div>
 </section>
