@@ -1,6 +1,10 @@
-{{-- Blocco CMS del menu (pagina `menu.index`). Dati: GetActiveMenuCategoriesAction (modulo Restaurant). --}}
+{{--
+    Blocco CMS del menu (pagine `menu.index` e `restaurants.menu`). Dati: GetActiveMenuCategoriesAction.
+    Con `$item` (ristorante della pagina) solo i suoi piatti; senza, il catalogo non assegnato.
+    Allergeni: etichette tradotte, comprese quelle che arrivano dagli ingredienti (Product::allergenCases).
+--}}
 @php
-    $categories = app(\Modules\Restaurant\Actions\Menu\GetActiveMenuCategoriesAction::class)->execute();
+    $categories = app(\Modules\Restaurant\Actions\Menu\GetActiveMenuCategoriesAction::class)->execute($item ?? null);
 @endphp
 <section class="section">
     <div class="container">
@@ -19,9 +23,10 @@
                                     <div>
                                         <h3>{{ $product->name }}</h3>
                                         @if ($product->description)<p>{{ $product->description }}</p>@endif
-                                        @if ($product->allergens)<p class="hint">{{ __('restaurant::menu_block.product.allergens.text', ['list' => $product->allergens]) }}</p>@endif
+                                        @php($allergenLabels = array_map(static fn ($case) => $case->getLabel(), $product->allergenCases()))
+                                        @if ($allergenLabels !== [])<p class="hint">{{ __('restaurant::menu_block.product.allergens.text', ['list' => implode(', ', $allergenLabels)]) }}</p>@endif
                                     </div>
-                                    <span class="price">€ {{ number_format((float) $product->price, 2, ',', '.') }}</span>
+                                    <span class="price">{{ \Illuminate\Support\Number::currency((float) $product->price, 'EUR', app()->getLocale()) }}</span>
                                 </article>
                             @empty
                                 <p class="hint">{{ $emptyCategoryText ?? '' }}</p>
