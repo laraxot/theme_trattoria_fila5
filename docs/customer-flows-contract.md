@@ -30,20 +30,39 @@ il flusso ordine/prenotazione.
 
 ## Pagine pubbliche
 
-| Pagina | Template Folio | Route | Scopo |
-|--------|---------------|-------|-------|
-| Home | `resources/views/pages/index.blade.php` | `home` | Landing del ristorante |
-| Menu | `resources/views/pages/[container0]/[slug0]/[restaurant]/index.blade.php` | `container0.index?container0=menu` | Lista piatti del ristorante attivo |
-| Prenota | `resources/views/pages/prenota.blade.php` | `container0.index?container0=prenota` | Form prenotazione tavolo |
-| Ordine | `resources/views/pages/ordine.blade.php` | `container0.index?container0=ordine` | Scelta modalità ordine + passaggio al menu |
+Il tema non ha pagine Folio dedicate per questi flussi: tutto passa dalle pagine generiche
+`resources/views/pages/[container0]/...` che risolvono una pagina CMS (`ResolvePageAction`) e ne
+rendono i blocchi. Logica e dati: Action del modulo Restaurant, mai controller o route nel modulo.
+Fonte di verita' dettagliata: `Modules/Restaurant/docs/public-menu-table-cms.md`.
+
+| URL | Route Folio | Pagina CMS | Blocchi principali | Scopo |
+|-----|-------------|------------|--------------------|-------|
+| `/{lang}` | `home` | `home` | hero, griglie | Landing |
+| `/{lang}/menu` | `container0.index` | `menu.index` | hero, cards, `menu/categories` | Sezioni del menu |
+| `/{lang}/menu/{slug}` | `container0.view` | `menu.view` (fallback) | `public_menu` | Menu del ristorante dal QR, filtri allergeni e regimi |
+| `/{lang}/restaurants/{slug}` | `container0.view` | `restaurants.view` | `restaurant_detail` | Minisito: contatti, orari, CTA menu/prenota |
+| `/{lang}/restaurants/{slug}/menu` | `container0.container1.view` | `restaurants.menu` | hero, `menu/categories` | Menu nel minisito |
+| `/{lang}/restaurants/{slug}/book` | `container0.container1.view` | `restaurants.book` | hero, `reservation_form` | Prenotazione per quel ristorante |
+| `/{lang}/prenota` | `container0.index` | `prenota.index` | hero, `reservation_form` | Prenotazione generica |
+| `/{lang}/ordine` | `container0.index` | `ordine.index` | hero, cards | Scelta modalita' ordine |
+| `/{lang}/table/{id}/qr` | `container0.container1.view` | `table.view` | `table_order` | Ordine al tavolo da QR |
+
+`resources/views/pages/prenota.blade.php.bak` e `ordine.blade.php.bak` sono le vecchie pagine
+dedicate, sostituite dalle pagine CMS: non sono piu' servite.
 
 ## Modelli Restaurant collegati
 
-| Modello | Campo chiave | Usato in |
+Il "ristorante" e' il **tenant** del modulo User (`XotData::getTenantClass()`, chiave stringa,
+`slug`): non esiste un modello `Restaurant\Models\Restaurant`.
+
+| Modello | Campi usati | Usato in |
 |---------|-------------|----------|
-| `Restaurant\Models\Restaurant` | `id`, `slug`, `title` | Home, menu (ristorante attivo) |
-| `Restaurant\Models\Reservation` | `name`, `email`, `phone`, `party_size`, `reservation_date`, `reservation_time`, `notes`, `status` | Prenota |
-| `Restaurant\Models\Order` | `order_type` (`dine_in|takeaway|delivery`), `covers`, `table_id` | Ordine |
+| Tenant (modulo User) | `id`, `slug`, `name`, contatti, `settings` (orari, slogan, logo) | menu, minisito, prenota |
+| `Restaurant\Models\ProductCategory` | `name`, `sort_order`, `is_active`, `tenant_id` | menu |
+| `Restaurant\Models\Product` | `name`, `description`, `price`, `images`, `allergens`, `tenant_id`; `allergenCases()` | menu |
+| `Restaurant\Models\Ingredient` | `name`, `allergens` | menu (dettaglio piatto) |
+| `Restaurant\Models\Reservation` | `customer_name`, `email`, `phone`, `party_size`, `reservation_date`, `reservation_time`, `notes`, `status`, `tenant_id` | prenota |
+| `Restaurant\Models\Order` | `order_type` (`dine_in|takeaway|delivery`), `covers`, `table_id` | ordine, tavolo |
 
 ## Contratto form Prenota / book ristorante
 
