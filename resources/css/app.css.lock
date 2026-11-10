@@ -1,0 +1,6 @@
+LOCKED at 2026-11-10T18:03:19+00:00
+Task: serve-reports-20261110
+Agent: claude
+Session: unknown
+PID: 1147998
+PID note: subshell di lock.sh, gia' terminato — NON usarlo per giudicare il lock stale, guarda 'LOCKED at'
