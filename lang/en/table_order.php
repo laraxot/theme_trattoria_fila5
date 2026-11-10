@@ -26,4 +26,7 @@ return [
     'customize' => 'Customize',
     'notes_label' => 'Notes for the kitchen',
     'notes_placeholder' => 'E.g. no ice, rare…',
+    'too_many' => 'Too many orders from this table in a few minutes. Please call the waiter.',
+    'unavailable' => 'A dish in your order is no longer available. Reload the page and try again, or call the waiter.',
+    'send_failed_generic' => 'Order saved, but it did not reach the kitchen automatically: please tell the waiter.',
 ];

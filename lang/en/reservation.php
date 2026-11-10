@@ -22,4 +22,6 @@ return [
     'submit' => 'Send request',
     'success' => 'Request sent. We will confirm it shortly.',
     'error' => 'The request could not be sent. Please try again.',
+    'time_in_past' => 'For today, pick a time later than now.',
+    'too_many' => 'Too many requests. Try again in :minutes minutes or call the restaurant.',
 ];

@@ -2,7 +2,8 @@
     Piatto del menu pubblico, card stile vetrina (foto grande in alto, nome, prezzo,
     badge dieta e chip allergeni con tooltip). Il <details> nativo apre il dettaglio:
     gallery, descrizione, ingredienti e badge completi — nessun JS richiesto.
-    Variabile: $dish = ['product' => Product, 'allergens' => list<AllergenEnum>]
+    Variabile: $dish = ['product' => Product, 'allergens' => list<AllergenEnum>, 'available' => bool]
+    `available` false = esaurito oggi: il piatto resta nel menu con l'etichetta "Esaurito".
     Immagini: `products.images` JSON, path relativi a `assets/Restaurant/` (public del modulo).
 --}}
 @php
@@ -10,8 +11,9 @@
     $images = array_values(array_filter((array) ($product->images ?? [])));
     $euCases = array_values(array_filter($dish['allergens'], static fn ($case) => ! in_array($case, \Modules\Restaurant\Enums\AllergenEnum::dietaryCases(), true)));
     $dietCases = array_values(array_filter($dish['allergens'], static fn ($case) => in_array($case, \Modules\Restaurant\Enums\AllergenEnum::dietaryCases(), true)));
+    $soldOut = ($dish['available'] ?? true) === false;
 @endphp
-<details class="dish">
+<details @class(['dish', 'dish--soldout' => $soldOut])>
     <summary class="dish__summary">
         <span class="dish__media">
             @if ($images !== [])
@@ -24,6 +26,9 @@
         <span class="dish__main">
             <span class="dish__head">
                 <span class="dish__name">{{ $product->name }}</span>
+                @if ($soldOut)
+                    <span class="dish__soldout">{{ __('restaurant::public_menu.dish.sold_out.label') }}</span>
+                @endif
                 <span class="dish__toggle" aria-hidden="true">+</span>
             </span>
             @if (filled($product->description))

@@ -75,6 +75,9 @@ h1, h2, h3 { text-wrap: balance; } p { text-wrap: pretty; }
 .dish__summary:focus-visible { outline: 3px solid var(--terra); outline-offset: 2px; border-radius: var(--radius); }
 .dish__head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
 .dish__name { font: 600 1.1rem 'DM Sans', sans-serif; }
+/* Piatto esaurito oggi: resta nel menu, attenuato, con etichetta testuale (non solo colore). */
+.dish--soldout .dish__media, .dish--soldout .dish__name { opacity: .55; }
+.dish__soldout { display: inline-block; margin-left: .5rem; padding: .1rem .5rem; border-radius: 999px; font: 600 .75rem 'DM Sans', sans-serif; background: #f3e8e2; color: #7c2d12; }
 .dish__badges { display: flex; flex-wrap: wrap; gap: .35rem; }
 .dish__body { padding: 0 1rem 1rem; border-top: 1px solid var(--line); }
 .dish__body p { margin: .75rem 0 0; color: var(--muted); }

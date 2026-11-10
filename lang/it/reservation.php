@@ -22,4 +22,6 @@ return [
     'submit' => 'Invia richiesta',
     'success' => 'Richiesta inviata. Ti confermeremo al più presto.',
     'error' => 'Non è stato possibile inviare la richiesta. Riprova.',
+    'time_in_past' => 'Per oggi scegli un orario successivo a quello attuale.',
+    'too_many' => 'Hai inviato troppe richieste. Riprova tra :minutes minuti o telefona al ristorante.',
 ];

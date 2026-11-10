@@ -8,6 +8,7 @@ use Livewire\Volt\Component;
 use Modules\Cms\Actions\ResolvePageAction;
 use Modules\Cms\Http\Middleware\PageSlugMiddleware;
 use Modules\Cms\Models\Page as PageModel;
+use Modules\Restaurant\Actions\Menu\ResolveRouteRestaurantAction;
 
 name('container0.container1.view');
 middleware(PageSlugMiddleware::class);
@@ -18,7 +19,8 @@ middleware(PageSlugMiddleware::class);
  *
  * - `menu`: il record del ristorante viene risolto da ResolvePageAction e passato
  *   come `item` al blocco CMS del menu (che esige un PublicRestaurant).
- * - `book`: pagina di prenotazione del ristorante (slug0 non ancora verificato).
+ * - altre pagine (es. `book`): sotto `/restaurants` lo slug deve essere un ristorante attivo
+ *   (altrimenti 404) e arriva ai blocchi come `item` (es. "Presso :name" nel form di prenotazione).
  * Il nome della rotta e' generico: i link di scheda e menu usano `container0.container1.view`.
  */
 
@@ -53,6 +55,12 @@ new class extends Component {
 
         // Costruisci lo slug della pagina: restaurants.book
         $this->pageSlug = $container0.'.'.$container1;
+
+        if ($container0 === ResolveRouteRestaurantAction::CONTAINER) {
+            $restaurant = app(ResolveRouteRestaurantAction::class)->execute($container0, $slug0);
+            abort_if($restaurant === null, 404);
+            $this->pageData['item'] = $restaurant;
+        }
     }
 
     private function mountMenu(string $container0, string $slug0): void

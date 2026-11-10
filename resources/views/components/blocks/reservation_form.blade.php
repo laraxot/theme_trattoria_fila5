@@ -2,13 +2,25 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\RateLimiter;
+use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
+use Modules\Restaurant\Actions\Menu\ResolveRouteRestaurantAction;
 use Modules\Restaurant\Actions\Reservations\CreatePublicReservationAction;
+use Modules\Xot\Datas\XotData;
 
 /*
  * Form pubblico di prenotazione (blocco CMS `reservation_form`).
  * Dati facoltativi dal JSON: title, lead, submit_label, success_message.
  * Le etichette dei campi vengono da `pub_theme::reservation.*`.
+ *
+ * - Ristorante: su `/restaurants/{slug}/book` la prenotazione e' di quel ristorante. Si risolve
+ *   al primo caricamento dalla rotta e si tiene in `restaurantId` (#[Locked]: il browser non puo'
+ *   cambiarlo). Su `/prenota` (locale unico) resta null.
+ * - Telefono obbligatorio: e' l'unico modo per il ristorante di confermare o disdire.
+ * - Data e ora non nel passato (anche oggi: ora successiva a adesso).
+ * - Al massimo 5 invii ogni 10 minuti per indirizzo IP, contro lo spam.
  */
 new class extends Component {
     public string $customer_name = '';
@@ -27,9 +39,18 @@ new class extends Component {
 
     public bool $sent = false;
 
+    #[Locked]
+    public ?string $restaurantId = null;
+
     public function mount(): void
     {
         $this->reservation_date = now()->format('Y-m-d');
+
+        $restaurant = app(ResolveRouteRestaurantAction::class)->execute(
+            (string) request()->route('container0', ''),
+            (string) request()->route('slug0', ''),
+        );
+        $this->restaurantId = $restaurant === null ? null : (string) $restaurant->getKey();
     }
 
     public function decrementParty(): void
@@ -43,26 +64,51 @@ new class extends Component {
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     protected function rules(): array
     {
         return [
             'customer_name' => ['required', 'string', 'max:191'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['required', 'string', 'min:6', 'max:50', 'regex:/^[0-9+().\s\/-]+$/'],
             'email' => ['nullable', 'email', 'max:191'],
             'party_size' => ['required', 'integer', 'min:1', 'max:12'],
-            'reservation_date' => ['required', 'date', 'after_or_equal:today'],
-            'reservation_time' => ['required', 'date_format:H:i'],
+            'reservation_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'reservation_time' => [
+                'required',
+                'date_format:H:i',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value) || $this->reservation_date !== now()->format('Y-m-d')) {
+                        return;
+                    }
+                    if (Carbon::createFromFormat('Y-m-d H:i', $this->reservation_date.' '.$value)?->isPast() ?? false) {
+                        $fail(__('pub_theme::reservation.time_in_past'));
+                    }
+                },
+            ],
             'notes' => ['nullable', 'string', 'max:255'],
         ];
     }
 
     public function submit(): void
     {
-        $data = $this->validate();
+        $key = 'reservation:'.request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $this->addError('form', __('pub_theme::reservation.too_many', ['minutes' => (int) ceil(RateLimiter::availableIn($key) / 60)]));
 
-        app(CreatePublicReservationAction::class)->execute($data);
+            return;
+        }
+
+        $data = $this->validate();
+        RateLimiter::hit($key, 600);
+
+        $restaurant = null;
+        if ($this->restaurantId !== null) {
+            $restaurant = XotData::make()->getTenantClass()::query()->whereKey($this->restaurantId)->where('is_active', true)->first();
+            abort_if($restaurant === null, 404);
+        }
+
+        app(CreatePublicReservationAction::class)->execute($data, $restaurant);
 
         $this->sent = true;
         $this->reset(['customer_name', 'phone', 'email', 'party_size', 'reservation_time', 'notes']);
@@ -85,6 +131,7 @@ new class extends Component {
                 <p class="hint" role="status">{{ $success_message ?? __('pub_theme::reservation.success') }}</p>
             @else
                 <form wire:submit="submit">
+                    @error('form')<p class="hint" role="alert">{{ $message }}</p>@enderror
                     <div class="form-grid">
                         <div class="field">
                             <label for="reservation_customer_name">{{ __('pub_theme::reservation.customer_name') }}</label>
@@ -93,7 +140,7 @@ new class extends Component {
                         </div>
                         <div class="field">
                             <label for="reservation_phone">{{ __('pub_theme::reservation.phone') }}</label>
-                            <input id="reservation_phone" type="tel" wire:model="phone" autocomplete="tel">
+                            <input id="reservation_phone" type="tel" wire:model="phone" autocomplete="tel" inputmode="tel" required>
                             @error('phone')<p class="hint">{{ $message }}</p>@enderror
                         </div>
                         <div class="field">

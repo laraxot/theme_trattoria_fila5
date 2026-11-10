@@ -31,14 +31,12 @@ new class extends Component {
         $this->pageSlug = $resolved->pageSlug;
 
         $item = $resolved->item;
-        $predictId = is_object($item) && isset($item->id) ? $item->id : null;
 
         $this->data = [
             'container0' => $container0,
             'slug0' => $slug0,
             'slug' => $slug0,
             'item' => $item,
-            'predictId' => $predictId,
         ];
     }
 };

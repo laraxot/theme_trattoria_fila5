@@ -26,4 +26,7 @@ return [
     'customize' => 'Personalizza',
     'notes_label' => 'Note per la cucina',
     'notes_placeholder' => 'Es. senza ghiaccio, poco cotto…',
+    'too_many' => 'Troppi ordini inviati da questo tavolo in pochi minuti. Chiama il cameriere.',
+    'unavailable' => 'Un piatto del tuo ordine non e\' piu\' disponibile. Ricarica la pagina e riprova, o chiama il cameriere.',
+    'send_failed_generic' => 'Ordine registrato, ma non e\' arrivato in cucina in automatico: avvisa il cameriere.',
 ];
