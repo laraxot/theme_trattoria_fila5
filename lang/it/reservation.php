@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Prenota un tavolo',
+    'eyebrow' => 'Prenotazione tavolo',
+    'heading' => 'Il tuo posto è qui.',
+    'lead' => 'Compila il modulo e indicaci come contattarti. La richiesta verrà presa in carico dal team.',
+    'customer_name' => 'Nome e cognome',
+    'phone' => 'Telefono',
+    'email' => 'Email',
+    'party_size' => 'Persone',
+    'person' => 'persona',
+    'people' => 'persone',
+    'at_restaurant' => 'Presso :name',
+    'decrease_guests' => 'Riduci numero di persone',
+    'increase_guests' => 'Aumenta numero di persone',
+    'reservation_date' => 'Data',
+    'reservation_time' => 'Orario',
+    'notes' => 'Note',
+    'notes_placeholder' => 'Allergie, esigenze o richieste speciali',
+    'hint' => 'La prenotazione viene registrata come confermata. Il tavolo viene assegnato dal personale.',
+    'submit' => 'Invia richiesta',
+    'success' => 'Richiesta inviata. Ti confermeremo al più presto.',
+    'error' => 'Non è stato possibile inviare la richiesta. Riprova.',
+];

@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Book a table',
+    'eyebrow' => 'Table reservation',
+    'heading' => 'Your seat is here.',
+    'lead' => 'Fill in the form and tell us how to contact you. The request will be taken over by the team.',
+    'customer_name' => 'Name and surname',
+    'phone' => 'Telephone',
+    'email' => 'Email',
+    'party_size' => 'People',
+    'person' => 'person',
+    'people' => 'people',
+    'at_restaurant' => 'At :name',
+    'decrease_guests' => 'Decrease number of guests',
+    'increase_guests' => 'Increase number of guests',
+    'reservation_date' => 'Date',
+    'reservation_time' => 'Time',
+    'notes' => 'Notes',
+    'notes_placeholder' => 'Allergies, needs or special requests',
+    'hint' => 'The reservation is recorded as confirmed. Staff will assign the table.',
+    'submit' => 'Send request',
+    'success' => 'Request sent. We will confirm it shortly.',
+    'error' => 'The request could not be sent. Please try again.',
+];
