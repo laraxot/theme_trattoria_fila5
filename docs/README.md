@@ -71,6 +71,10 @@ Il tenant si risolve dall'header `Host` via `Modules/Tenant`
 `Modules/Xot/docs/console/commands/xot-asset-links.md`). URL asset:
 `/themes/Trattoria/...`.
 
+> **`public_html/` è la document root del progetto: non va mai cancellata, svuotata o sostituita.**
+> Per rigenerare gli asset si sovrascrivono i file o si ricrea il solo symlink del tema.
+> Regole complete: `Modules/Restaurant/docs/regole-progetto.md`.
+
 ## Regole
 
 - Template engine: Folio/Volt/Laraxot — no controller FO.
