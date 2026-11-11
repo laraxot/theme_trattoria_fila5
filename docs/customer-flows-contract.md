@@ -45,7 +45,8 @@ Fonte di verita' dettagliata: `Modules/Restaurant/docs/public-menu-table-cms.md`
 | `/{lang}/restaurants/{slug}/book` | `container0.container1.view` | `restaurants.book` | hero, `reservation_form` | Prenotazione per quel ristorante |
 | `/{lang}/prenota` | `container0.index` | `prenota.index` | hero, `reservation_form` | Prenotazione generica |
 | `/{lang}/ordine` | `container0.index` | `ordine.index` | hero, cards | Scelta modalita' ordine |
-| `/{lang}/table/{id}/qr` | `container0.container1.view` | `table.view` | `table_order` | Ordine al tavolo da QR |
+| `/{lang}/restaurants/{slug}/table/{id}/order?v=&signature=` | `container0.container1.container2.view` | `restaurants.table_order` | `table_order_form` | Ordine al tavolo dal QR firmato |
+| `/{lang}/table/{id}/qr` | `container0.container1.view` | `table.view` | `table_order` (statico) | Vecchi QR stampati: invita a scansionare il nuovo, non legge il DB |
 
 `resources/views/pages/prenota.blade.php.bak` e `ordine.blade.php.bak` sono le vecchie pagine
 dedicate, sostituite dalle pagine CMS: non sono piu' servite.

@@ -29,4 +29,7 @@ return [
     'too_many' => 'Troppi ordini inviati da questo tavolo in pochi minuti. Chiama il cameriere.',
     'unavailable' => 'Un piatto del tuo ordine non e\' piu\' disponibile. Ricarica la pagina e riprova, o chiama il cameriere.',
     'send_failed_generic' => 'Ordine registrato, ma non e\' arrivato in cucina in automatico: avvisa il cameriere.',
+    'legacy_title' => 'Questo QR non è più attivo',
+    'legacy_text' => 'Il codice che hai scansionato è di una versione precedente. Scansiona il QR aggiornato sul tavolo oppure chiedi al cameriere: ti porta direttamente al menu per ordinare.',
+    'ordering_off' => 'Gli ordini dal tavolo sono stati appena sospesi: chiama il cameriere per ordinare.',
 ];

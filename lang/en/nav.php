@@ -13,4 +13,8 @@ return [
     'main_menu' => 'Main menu',
     'skip_to_content' => 'Skip to content',
     'close_menu' => 'Close menu',
+    'login' => 'Log in',
+    'logout' => 'Log out',
+    'work_areas' => 'Your work areas',
+    'account_menu' => 'Menu for :name',
 ];

@@ -12,6 +12,7 @@ use Modules\Restaurant\Actions\Menu\FindPublicRestaurantAction;
 use Modules\Restaurant\Actions\Menu\GetPublicMenuAction;
 use Modules\Restaurant\Actions\Order\CreateCustomerOrderAction;
 use Modules\Restaurant\Actions\Order\SendOrderToStationsAction;
+use Modules\Restaurant\Actions\Table\IsTableOrderingEnabledAction;
 use Modules\Restaurant\Actions\Table\ResolveRestaurantTableAction;
 use Modules\Restaurant\Actions\Table\VerifyTableOrderRequestAction;
 use Modules\Restaurant\Exceptions\RestaurantException;
@@ -29,6 +30,8 @@ use Modules\Restaurant\Models\ProductModifier;
  *   cambiarli tra una richiesta Livewire e l'altra (prima si poteva cambiare `tableId`).
  * - Piatti esauriti (`is_available` false) non si offrono; se finiscono mentre il cliente
  *   ordina, messaggio chiaro invece di un errore.
+ * - Ordini dal tavolo spenti per il ristorante (IsTableOrderingEnabledAction): il QR porta al menu
+ *   pubblico `/menu/{slug}`; se vengono spenti mentre il cliente ordina, l'invio e' rifiutato.
  * - Al massimo 10 invii ogni 10 minuti per IP e tavolo.
  * - Menu: solo prodotti del tenant via GetPublicMenuAction; i modificatori
  *   arrivano da `product_modifiers` attivi del stesso prodotto.
@@ -44,6 +47,9 @@ new class extends Component {
 
     #[Locked]
     public string $tableName = '';
+
+    #[Locked]
+    public string $restaurantSlug = '';
 
     #[Locked]
     /** @var array<int, array{id: int, name: string, price: float, description: string, images: list<string>, modifiers: list<array{id: int, name: string, price_delta: float}>}> */
@@ -81,6 +87,14 @@ new class extends Component {
         $table = app(ResolveRestaurantTableAction::class)->execute($restaurant, (string) request()->route('slug1', ''));
         abort_if($table === null || ! app(VerifyTableOrderRequestAction::class)->execute(request(), $table), 404);
 
+        // Ordini dal tavolo spenti: il QR resta valido e porta al menu del ristorante.
+        if (! app(IsTableOrderingEnabledAction::class)->execute($restaurant)) {
+            $this->redirect(route('container0.view', ['container0' => 'menu', 'slug0' => (string) $restaurant->getAttribute('slug')]));
+
+            return;
+        }
+
+        $this->restaurantSlug = (string) $restaurant->getAttribute('slug');
         $this->restaurantName = (string) $restaurant->getAttribute('name');
         $this->tableName = (string) $table->name;
         $this->tableId = (int) $table->id;
@@ -110,7 +124,7 @@ new class extends Component {
                 'name' => (string) $product->name,
                 'price' => (float) $product->price,
                 'description' => (string) ($product->description ?? ''),
-                'images' => array_values(array_map('strval', (array) ($product->images ?? []))),
+                'images' => $product->imageUrls(),
                 'modifiers' => $modifiers->get($product->id, collect())->map(static fn (ProductModifier $m): array => [
                     'id' => (int) $m->id,
                     'name' => (string) $m->name,
@@ -165,6 +179,17 @@ new class extends Component {
             'cart.*.notes' => ['nullable', 'string', 'max:255'],
         ]);
         RateLimiter::hit($key, 600);
+
+        try {
+            $restaurant = app(FindPublicRestaurantAction::class)->execute($this->restaurantSlug);
+        } catch (ModelNotFoundException) {
+            $restaurant = null;
+        }
+        if ($restaurant === null || ! app(IsTableOrderingEnabledAction::class)->execute($restaurant)) {
+            $this->addError('order', __('pub_theme::table_order.ordering_off'));
+
+            return;
+        }
 
         $items = [];
         foreach ($this->cart as $productId => $row) {
@@ -319,7 +344,7 @@ new class extends Component {
                             <article class="dish dish--order">
                                 <div class="dish__media">
                                     @if ($dish['images'] !== [])
-                                        <img class="dish__photo" src="{{ asset('assets/Restaurant/'.e($dish['images'][0])) }}" alt="{{ $dish['name'] }}" loading="lazy">
+                                        <img class="dish__photo" src="{{ $dish['images'][0] }}" alt="{{ $dish['name'] }}" loading="lazy">
                                     @else
                                         <span class="dish__photo dish__photo--empty" aria-hidden="true"><x-icon name="restaurant-menu" /></span>
                                     @endif

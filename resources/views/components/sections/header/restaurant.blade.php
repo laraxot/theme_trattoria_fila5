@@ -18,13 +18,14 @@
     <div class="container site-header__inner">
         <a href="{{ route('container0.view', $restaurantParams) }}" class="brand" aria-label="{{ $restaurantName }}">
             @if ($profile['logo'] !== null)
-                <img class="brand__logo" src="{{ asset('assets/Restaurant/'.e($profile['logo'])) }}" alt="" width="32" height="32">
+                <img class="brand__logo" src="{{ app(\Modules\Restaurant\Actions\Asset\RestaurantAssetUrlAction::class)->execute($profile['logo']) }}" alt="" width="32" height="32">
             @else
                 <span class="brand__mark" aria-hidden="true">✦</span>
             @endif
             <span><strong>{{ $restaurantName }}</strong><small>{{ $profile['slogan'] ?? __('restaurant::public_restaurants.site.subtitle.text') }}</small></span>
         </a>
         @include('pub_theme::components.sections.header.language-switch')
+        @include('pub_theme::components.sections.header.user-menu')
         <button type="button" class="icon-button nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="main-navigation">
             <span class="sr-only">{{ __('pub_theme::nav.open_menu') }}</span><span data-nav-glyph aria-hidden="true">☰</span>
         </button>

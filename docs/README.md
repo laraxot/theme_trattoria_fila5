@@ -66,7 +66,7 @@ Il tenant si risolve dall'header `Host` via `Modules/Tenant`
 
 ## Asset pubblici
 
-`public_html/themes/Trattoria` è symlink a `Themes/Trattoria/public`
+`public_html/themes/Trattoria` è il symlink relativo `../../laravel/Themes/Trattoria/public`
 (creato da `php artisan xot:theme-link`, vedi
 `Modules/Xot/docs/console/commands/xot-asset-links.md`). URL asset:
 `/themes/Trattoria/...`.

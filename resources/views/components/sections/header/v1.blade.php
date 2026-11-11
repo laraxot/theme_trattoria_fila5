@@ -25,6 +25,7 @@
             <span><strong>{{ $brand }}</strong><small>{{ $brandSubtitle }}</small></span>
         </a>
         @include('pub_theme::components.sections.header.language-switch')
+        @include('pub_theme::components.sections.header.user-menu')
         <button type="button" class="icon-button nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="main-navigation">
             <span class="sr-only">{{ __('pub_theme::nav.open_menu') }}</span><span data-nav-glyph aria-hidden="true">☰</span>
         </button>

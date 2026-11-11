@@ -197,7 +197,7 @@ h1, h2, h3 { text-wrap: balance; } p { text-wrap: pretty; }
 @media (min-width: 768px) { .site-header .site-nav { order: 1; margin-left: auto; } .site-header .lang-menu, .site-header .lang-switch { order: 2; margin-left: 0; } }
 
 /* Audit ispirazione award-site: hero fotografico, path fotografico nel dettaglio */
-.menu-hero { position: relative; padding: clamp(1.6rem, 4.5vw, 2.6rem); border-radius: var(--radius); overflow: hidden; background: linear-gradient(105deg, rgba(87,35,19,.93) 20%, rgba(127,50,29,.72) 70%, rgba(127,50,29,.45)), url('/assets/Restaurant/menu/bistecca-fiorentina-1.jpg') center/cover; color: #fff8ef; }
+.menu-hero { position: relative; padding: clamp(1.6rem, 4.5vw, 2.6rem); border-radius: var(--radius); overflow: hidden; background: linear-gradient(105deg, rgba(87,35,19,.93) 20%, rgba(127,50,29,.72) 70%, rgba(127,50,29,.45)), url('/assets/restaurant/menu/bistecca-fiorentina-1.jpg') center/cover; color: #fff8ef; }
 .menu-hero .eyebrow { color: #f4d9a9; }
 .menu-hero h1 { color: #fff8ef; }
 .menu-hero .lead { color: #f8e5d1; }
@@ -276,3 +276,37 @@ html { scroll-behavior: smooth; }
   .site-nav .lang-switch { margin: .5rem 0 0; }
   .site-nav .lang-switch__menu { position: static; box-shadow: none; border-left: 0; border-right: 0; border-radius: 0; width: 100%; }
 }
+
+/* Accesso: link "Accedi" o avatar con menu (stesso schema del selettore lingua) */
+.user-login { display: inline-flex; align-items: center; gap: .4rem; min-height: 2.75rem; padding: 0 .8rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--terra-dark); font-size: .85rem; font-weight: 600; }
+.user-login:hover, .user-login:focus-visible { border-color: var(--terra); }
+.user-login:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+.user-menu { position: relative; }
+.user-menu__toggle { display: inline-flex; align-items: center; gap: .35rem; min-height: 2.75rem; padding: 0 .4rem 0 .25rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--terra-dark); cursor: pointer; list-style: none; }
+.user-menu__toggle::-webkit-details-marker { display: none; }
+.user-menu__toggle:hover { border-color: var(--terra); }
+.user-menu__toggle:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+.user-menu__avatar { display: grid; place-items: center; width: 2.15rem; height: 2.15rem; border-radius: 50%; background: var(--terra); color: #fff8ef; font-size: .8rem; font-weight: 700; letter-spacing: .03em; }
+.user-menu__chevron { font-size: .7rem; transition: transform .15s ease; }
+.user-menu[open] .user-menu__chevron { transform: rotate(180deg); }
+.user-menu__panel { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 60; min-width: 14rem; max-width: calc(100vw - 2rem); padding: .4rem; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.user-menu__who { display: grid; gap: .1rem; padding: .55rem .7rem .7rem; border-bottom: 1px solid var(--line); }
+.user-menu__who strong { color: var(--terra-dark); font-size: .95rem; overflow-wrap: anywhere; }
+.user-menu__who small { color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
+.user-menu__heading { margin: .5rem .7rem .2rem; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.user-menu__list { margin: 0; padding: 0; list-style: none; }
+.user-menu__item { display: flex; align-items: center; width: 100%; min-height: 2.75rem; padding: .45rem .7rem; border: 0; border-radius: calc(var(--radius) - 4px); background: none; color: var(--terra-dark); font-size: .95rem; text-align: left; cursor: pointer; }
+.user-menu__item:hover, .user-menu__item:focus-visible { background: rgba(127,50,29,.07); }
+.user-menu__logout { margin: .3rem 0 0; padding-top: .3rem; border-top: 1px solid var(--line); }
+@media (min-width: 768px) { .site-header .user-menu, .site-header .user-login { order: 3; } }
+
+/* Accesso e registrazione */
+.auth__container { max-width: 32rem; }
+.auth .form-card { margin-top: 1.5rem; }
+.field__error { margin: 0; color: #8e291d; font-size: .82rem; }
+.field input[aria-invalid="true"] { border-color: #b4412f; }
+.auth__remember { display: flex; align-items: center; gap: .5rem; color: var(--muted); font-size: .9rem; }
+.auth__remember input { width: 1.1rem; height: 1.1rem; accent-color: var(--terra); }
+.auth .button { justify-self: start; }
+.auth__links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1rem; margin: 0; font-size: .9rem; }
+.auth__links a { color: var(--terra); text-decoration: underline; text-underline-offset: 3px; }

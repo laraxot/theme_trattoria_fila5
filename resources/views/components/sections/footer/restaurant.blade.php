@@ -14,7 +14,7 @@
         <div>
             <a class="brand brand--footer" href="{{ route('container0.view', $restaurantParams) }}">
                 @if ($profile['logo'] !== null)
-                    <img class="brand__logo" src="{{ asset('assets/Restaurant/'.e($profile['logo'])) }}" alt="" width="36" height="36">
+                    <img class="brand__logo" src="{{ app(\Modules\Restaurant\Actions\Asset\RestaurantAssetUrlAction::class)->execute($profile['logo']) }}" alt="" width="36" height="36">
                 @else
                     <span class="brand__mark" aria-hidden="true">✦</span>
                 @endif
