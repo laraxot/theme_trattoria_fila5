@@ -55,6 +55,8 @@ new class extends Component {
 
         // Costruisci lo slug della pagina: restaurants.book
         $this->pageSlug = $container0.'.'.$container1;
+        // Nessuna pagina CMS per questo indirizzo: 404 vero, non una pagina vuota con 200.
+        abort_unless(PageModel::where('slug', $this->pageSlug)->exists(), 404);
 
         if ($container0 === ResolveRouteRestaurantAction::CONTAINER) {
             $restaurant = app(ResolveRouteRestaurantAction::class)->execute($container0, $slug0);

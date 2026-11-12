@@ -1,29 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 return [
+    'eyebrow' => 'Ristoranti, menu e prenotazioni',
     'title' => 'Il gusto di stare insieme',
-    'description' => 'Cucina italiana contemporanea: menu, prenotazioni e ordini.',
-    'lead' => 'Scopri il menu, prenota il tuo tavolo oppure scegli come ricevere il tuo ordine. Un’esperienza semplice da ogni dispositivo.',
-    'discover_menu' => 'Scopri il menu',
+    'description' => 'Trova il ristorante, consulta il menu con il filtro per allergeni e intolleranze, prenota il tavolo e ordina dal QR al tavolo.',
+    'lead' => 'Scegli il ristorante, guarda il menu con gli allergeni di ogni piatto e prenota il tuo tavolo. Al tavolo, inquadra il QR e ordina dal telefono.',
+    'discover_restaurants' => 'Scopri i ristoranti',
     'book_table' => 'Prenota un tavolo',
-    'today_in_room' => 'Oggi in sala',
-    'hours' => '12:00—',
-    'kitchen_open_until' => 'Cucina aperta fino alle 22:30',
-    'how_can_we_serve_you' => 'Come possiamo servirti?',
-    'book_or_order' => 'Prenota in anticipo o ordina quando sei pronto. Il percorso è ottimizzato per lo smartphone.',
-    'card_table' => [
-        'title' => 'Un tavolo per te',
-        'description' => 'Indicaci giorno, orario e numero di persone. Ti aspettiamo in sala.',
-        'action' => 'Prenota un tavolo',
+    'how_it_works' => 'Come funziona',
+    'how_it_works_lead' => 'Tre passi, da qualsiasi telefono. Non serve installare nulla.',
+    'steps' => [
+        'menu' => [
+            'title' => 'Menu con allergeni',
+            'description' => 'Ogni piatto mostra allergeni e ingredienti. Filtra per intolleranze o per dieta vegana, vegetariana, senza maiale o kosher.',
+            'action' => 'Apri un menu',
+        ],
+        'book' => [
+            'title' => 'Prenota il tavolo',
+            'description' => 'Scegli ristorante, giorno, orario e numero di persone. Il ristorante ti conferma per telefono, WhatsApp o email.',
+            'action' => 'Prenota',
+        ],
+        'table' => [
+            'title' => 'Ordina dal tavolo',
+            'description' => 'Nei ristoranti che lo offrono, inquadra il QR sul tavolo: scegli i piatti e l\'ordine arriva in cucina e al bar.',
+            'action' => 'Come si ordina',
+        ],
     ],
-    'card_takeaway' => [
-        'title' => 'Da asporto',
-        'description' => 'Scegli i tuoi piatti e passa a ritirarli all’orario preferito.',
-        'action' => 'Ordina da asporto',
-    ],
-    'card_dine_in' => [
-        'title' => 'Servizio al tavolo',
-        'description' => 'Ordina dal tavolo e lascia che pensiamo noi al resto.',
-        'action' => 'Ordina al tavolo',
+    'restaurants_title' => 'I ristoranti',
+    'restaurants_lead' => 'Apri il menu o prenota direttamente.',
+    'restaurateur' => [
+        'title' => 'Hai un ristorante?',
+        'description' => 'Menu digitale con allergeni, QR per ogni tavolo, prenotazioni e ordini che arrivano alle postazioni: tutto da un unico pannello.',
+        'contact' => 'Contattaci',
+        'login' => 'Accedi all\'area ristoratore',
     ],
 ];

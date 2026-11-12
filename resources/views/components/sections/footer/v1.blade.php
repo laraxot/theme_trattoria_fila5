@@ -10,9 +10,9 @@
     $brand = $data['brand'] ?? __('pub_theme::nav.brand');
     $brandSubtitle = $data['brand_subtitle'] ?? __('pub_theme::nav.subtitle');
     $tagline = $data['tagline'] ?? __('pub_theme::footer.tagline');
-    $address = $data['address'] ?? config('app.restaurant_address', 'Via della Tavola, 12');
-    $city = $data['city'] ?? config('app.restaurant_city', 'Roma');
-    $hours = $data['hours'] ?? __('pub_theme::footer.hours_value');
+    // Colonne di link (Esplora, Informazioni, Note legali): dalla sezione CMS `footer`.
+    // Niente indirizzo o orari qui: il portale ha piu' ristoranti, ognuno con la sua scheda.
+    $columns = is_array($data['columns'] ?? null) ? $data['columns'] : [];
 @endphp
 <footer class="site-footer">
     <div class="container site-footer__grid">
@@ -23,17 +23,20 @@
             </a>
             <p class="site-footer__note">{{ $tagline }}</p>
         </div>
-        <div>
-            <h2 class="footer-heading">{{ __('pub_theme::footer.visit_us') }}</h2>
-            <p>{{ $address }}<br>{{ $city }}</p>
-        </div>
-        <div>
-            <h2 class="footer-heading">{{ __('pub_theme::footer.hours') }}</h2>
-            <p>{{ $hours }}<br><a href="{{ route('container0.index', ['container0' => 'prenota']) }}">{{ __('pub_theme::footer.book_table') }} →</a></p>
-        </div>
+        @foreach ($columns as $column)
+            <nav aria-label="{{ $column['title'] ?? '' }}">
+                <h2 class="footer-heading">{{ $column['title'] ?? '' }}</h2>
+                <ul class="footer-links">
+                    @foreach (($column['links'] ?? []) as $link)
+                        @php($href = isset($link['route']) ? route($link['route'], $link['params'] ?? []) : ($link['url'] ?? '#'))
+                        <li><a href="{{ $href }}">{{ $link['label'] ?? '' }}</a></li>
+                    @endforeach
+                </ul>
+            </nav>
+        @endforeach
     </div>
     <div class="container site-footer__bottom">
-        <span>© {{ date('Y') }} {{ config('app.name', 'Trattoria') }}</span>
+        <span>© {{ date('Y') }} {{ $brand }}</span>
         <span>{{ __('pub_theme::footer.made_in_italy') }}</span>
     </div>
 </footer>

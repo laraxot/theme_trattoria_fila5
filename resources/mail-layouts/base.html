@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>{{ brand_name }}</title>
+    <style>
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { border: 0; height: auto; outline: none; text-decoration: none; }
+        body { margin: 0; padding: 0; width: 100% !important; }
+        a { color: #7f321d; }
+        @media screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+            .content { padding: 24px 20px !important; }
+        }
+    </style>
+</head>
+<!--
+    Layout email del tema Trattoria (transazionali: reset password, verifica email, conferme).
+    Niente immagini: il marchio e' testo, cosi' si legge anche nei client che bloccano immagini o SVG.
+    Variabili: brand_name, site_url, body (contenuto del template).
+-->
+<body style="margin:0;padding:0;background-color:#fbf5ec;font-family:Arial,Helvetica,sans-serif;color:#2d211a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fbf5ec;">
+        <tr>
+            <td align="center" style="padding:24px 12px;">
+                <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#fffdf9;border:1px solid #eaded0;border-radius:12px;">
+                    <tr>
+                        <td style="padding:22px 32px;border-bottom:3px solid #d7954b;">
+                            <a href="{{ site_url }}" style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:bold;color:#7f321d;text-decoration:none;">{{ brand_name }}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content" style="padding:32px;font-size:16px;line-height:1.55;color:#2d211a;">
+                            {{{ body }}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:18px 32px;background-color:#572313;color:#fbf5ec;font-size:13px;line-height:1.5;border-radius:0 0 12px 12px;">
+                            <a href="{{ site_url }}" style="color:#fbf5ec;text-decoration:underline;">{{ brand_name }}</a><br>
+                            Email automatica: non rispondere a questo messaggio. / Automatic email: please do not reply.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

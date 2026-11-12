@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+/* Font serviti dal sito (niente richieste a Google: GDPR). Solo il sottoinsieme latino, accenti italiani compresi. */
+@import '@fontsource/dm-sans/latin-400.css';
+@import '@fontsource/dm-sans/latin-500.css';
+@import '@fontsource/dm-sans/latin-600.css';
+@import '@fontsource/dm-sans/latin-700.css';
+@import '@fontsource/playfair-display/latin-500.css';
+@import '@fontsource/playfair-display/latin-600.css';
+@import '@fontsource/playfair-display/latin-700.css';
 
 :root { --terra: #7f321d; --terra-dark: #572313; --saffron: #d7954b; --cream: #fbf5ec; --paper: #fffdf9; --ink: #2d211a; --muted: #74655a; --line: #eaded0; --shadow: 0 12px 36px rgba(87,35,19,.10); --radius: 1rem; }
 * { box-sizing: border-box; } html { scroll-behavior: smooth; } body { margin: 0; background: var(--cream); color: var(--ink); font-family: 'DM Sans', system-ui, sans-serif; line-height: 1.5; } a { color: inherit; text-decoration: none; } button, a { -webkit-tap-highlight-color: transparent; } button, input, select, textarea { font: inherit; }
@@ -310,3 +317,71 @@ html { scroll-behavior: smooth; }
 .auth .button { justify-self: start; }
 .auth__links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1rem; margin: 0; font-size: .9rem; }
 .auth__links a { color: var(--terra); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Testi lunghi delle pagine CMS (privacy, cookie, termini, chi siamo) */
+.prose-block { max-width: 48rem; }
+.prose-block__updated { color: var(--muted); font-size: .9rem; margin: .25rem 0 1.5rem; }
+.prose { color: var(--ink); line-height: 1.7; }
+.prose > * + * { margin-top: 1rem; }
+.prose h2 { margin-top: 2.25rem; font-size: 1.45rem; }
+.prose h3 { margin-top: 1.75rem; font-size: 1.15rem; }
+.prose ul, .prose ol { padding-left: 1.25rem; }
+.prose li + li { margin-top: .35rem; }
+.prose a { color: var(--terra); text-decoration: underline; text-underline-offset: 3px; }
+.table-scroll { overflow-x: auto; border-radius: .5rem; }
+.table-scroll:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; }
+.prose table { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: .92rem; }
+.prose th, .prose td { border: 1px solid var(--line); padding: .55rem .7rem; text-align: left; vertical-align: top; }
+.prose th { background: var(--cream); }
+
+/* Domande frequenti */
+.faq { max-width: 48rem; }
+.faq__group { margin-top: 2rem; }
+.faq__group-title { font-size: 1.1rem; margin-bottom: .75rem; color: var(--terra-dark); }
+.faq__item { border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); }
+.faq__item + .faq__item { margin-top: .6rem; }
+.faq__question { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1rem 1.15rem; min-height: 2.75rem; font-weight: 600; color: var(--terra-dark); }
+.faq__question::-webkit-details-marker { display: none; }
+.faq__question::after { content: '+'; font-size: 1.3rem; line-height: 1; color: var(--terra); transition: transform .15s ease; }
+.faq__item[open] .faq__question::after { transform: rotate(45deg); }
+.faq__question:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; border-radius: var(--radius); }
+.faq__answer { padding: 0 1.15rem 1.1rem; }
+
+/* Contatti */
+.contact-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin-top: 1.5rem; }
+.contact-card { display: grid; gap: .6rem; align-content: start; }
+.contact-card .button { justify-self: start; }
+
+/* Pulsante principale sull'hero scuro: zafferano, leggibile sul fondo terracotta */
+.hero .button--primary, .menu-hero .button--primary { background: var(--saffron); color: var(--terra-dark); }
+
+/* Schede dei ristoranti del portale */
+.restaurant-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); margin-top: 1.5rem; }
+.restaurant-card { display: grid; gap: .85rem; align-content: start; }
+.restaurant-card__head { display: flex; gap: .85rem; align-items: center; }
+.restaurant-card__logo { width: 3.5rem; height: 3.5rem; flex: none; border-radius: .9rem; object-fit: cover; background: var(--cream); border: 1px solid var(--line); }
+.restaurant-card__logo--initial { display: grid; place-items: center; font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--terra); }
+.restaurant-card__name { margin: 0; font-size: 1.2rem; }
+.restaurant-card__name a { color: inherit; }
+.restaurant-card__name a:hover, .restaurant-card__name a:focus-visible { color: var(--terra); text-decoration: underline; text-underline-offset: 3px; }
+.restaurant-card__slogan, .restaurant-card__address { margin: 0; color: var(--muted); font-size: .92rem; }
+.restaurant-card .actions { margin-top: auto; }
+
+/* Invito ai ristoratori in home */
+.restaurateur-cta { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; background: var(--cream); }
+.restaurateur-cta h2 { margin: 0 0 .35rem; }
+.restaurateur-cta p { margin: 0; color: var(--muted); max-width: 40rem; }
+
+/* Colonne di link nel footer */
+.footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.footer-links a { color: inherit; opacity: .85; }
+.footer-links a:hover, .footer-links a:focus-visible { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 900px) { .site-footer__grid { grid-template-columns: 2fr repeat(3, 1fr); } }
+
+/* Banner dei cookie (modulo Gdpr): usa --bs-primary, qui il terracotta del tema */
+:root { --bs-primary: var(--terra); }
+.gdpr-cookiebar { font-family: 'DM Sans', system-ui, sans-serif; color: var(--ink); background: var(--paper); }
+.gdpr-cookiebar .gdpr-btn.gdpr-btn { border-radius: 999px; }
+.auth .alert { margin: 1.5rem 0 0; }
+.auth .form-card .alert { margin: 0; }
+.link-button { padding: 0; border: 0; background: none; color: var(--terra); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

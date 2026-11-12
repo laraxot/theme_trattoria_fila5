@@ -10,7 +10,7 @@ status: active
 module: Trattoria
 tags: [trattoria, cms, folio, volt, blocchi, i18n, restaurant]
 created: "2026-11-10"
-updated: "2026-11-10"
+updated: "2026-11-12"
 qmd: "trattoria cms blocchi content_blocks container0 slug0 pagine json"
 issues: []
 discussions: []
@@ -62,11 +62,34 @@ File in `laravel/config/local/restaurant/database/content/pages/{slug}.json`:
 | `menu` | `pub_theme::components.blocks.menu.categories` | categorie/piatti del tenant |
 | `reservation_form` | `pub_theme::components.blocks.reservation_form` | form prenotazione → `CreatePublicReservationAction` |
 | `public_menu` | `pub_theme::components.blocks.public_menu` | menu pubblico `/menu/{slug-ristorante}` con filtro `?senza[]=` |
-| `table_order` | `pub_theme::components.blocks.table_order` | stato ordine tavolo `/table/{id}` (404 se ignoto) |
+| `table_order` | `pub_theme::components.blocks.table_order` | vecchio QR `/table/{id}` e `/table/{id}/qr` (pagine `table.view`, `table.qr`): spiega che serve il nuovo QR, non legge il DB |
+| `restaurant_list` | `pub_theme::components.blocks.restaurant_list` | elenco ristoranti del portale. Dati: `eyebrow`, `title`, `lead`, `heading` (`h1` pagina dedicata / `h2` dentro altre pagine), `primary` (`menu`\|`book`: azione evidenziata) |
+| `prose` | `pub_theme::components.blocks.prose` | testi lunghi (privacy, cookie, termini, chi siamo). Dati: `eyebrow`, `title`, `lead`, `updated_at`, `content` (HTML). L'HTML passa da `Modules\Cms\Actions\SanitizeHtmlAction`; le tabelle finiscono in un contenitore scorrevole focalizzabile (`.table-scroll`) |
+| `faq` | `pub_theme::components.blocks.faq` | domande frequenti: `groups[{title, items[{q, a}]}]`, ogni risposta in `<details>` |
+| `contact` | `pub_theme::components.blocks.contact` | canali di contatto: `channels[{title, text, email?, mail_from_config?}]`. Con `mail_from_config` mostra `MAIL_FROM_ADDRESS` e lo nasconde finché è `example.com` |
+
+`reservation_form` accetta anche `heading` (`h1` quando il modulo è il contenuto principale, es. `restaurants/book.json`;
+default `h2`). Senza ristorante nella route (`/prenota`) mostra la scelta del ristorante, preselezionabile con
+`?ristorante={slug}`.
 
 `public_menu` legge `request()->route('slug0')` come slug ristorante;
 `table_order` legge `slug0` come id tavolo. Funziona solo sulle route a due
 segmenti (`/{container0}/{slug0}`): `/menu/{slug}` e `/table/{id}`.
+
+## Indirizzi senza pagina = 404
+
+`[container0]/index`, `[container0]/[slug0]/index` e `[container0]/[slug0]/[container1]/index` rispondono 404 quando
+non esiste la pagina CMS corrispondente (niente pagine vuote con 200, che i motori di ricerca indicizzerebbero).
+Le pagine di errore sono `laravel/resources/views/errors/minimal.blade.php` (repository base): autonome, CSS in linea con
+i colori del tema, testi it/en dalla lingua dell'URL.
+
+## Accesso (`pages/auth`)
+
+`login`, `register`, `password/reset` (richiesta link), `password/[token]` (nuova password), `password/confirm`,
+`verify`: stesso stile (`.auth`, `.form-card`), testi in `lang/{it,en}/auth.php`, limiti di tentativi per email e IP.
+La richiesta del link mostra lo stesso messaggio che l'email esista o no. Le email usano
+`resources/mail-layouts/base.html` (marchio come testo, colori del tema); se un tema non ha il layout, Xot ripiega su
+quello del modulo Notify.
 
 ## Regole
 

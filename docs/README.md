@@ -62,7 +62,8 @@ Il tenant si risolve dall'header `Host` via `Modules/Tenant`
 | [layouts.md](layouts.md) | Componenti layout (`main`, `app`, alias), header e footer per ristorante, regole per chi modifica i layout |
 | [cms-pages-and-blocks.md](cms-pages-and-blocks.md) | Pagine CMS, blocchi e route Folio del tenant restaurant |
 | [layout-cms-sections.md](layout-cms-sections.md) | Layout `main`/`app`, `<x-cms::head>`, sezioni CMS header/footer, namespace `pub_theme` per le traduzioni |
-| [stories/](stories/) | Story BMAD epic `E-TRATTORIA-1` (foundation, waiter ordering, customer menu/booking, order modes, quality gate), più `STORY-TRATTORIA-06-container0-named-routes` (link interni via route) e `trattoria-home-motion-and-polish` (movimento e pulizia della home) |
+| [stories/](stories/) | Story BMAD epic `E-TRATTORIA-1` (foundation, waiter ordering, customer menu/booking, order modes, quality gate), più `STORY-TRATTORIA-06-container0-named-routes` (link interni via route) e `trattoria-home-motion-and-polish` (movimento e pulizia della home), `STORY-TRATTORIA-07-front-office-audit` (audit integrale per il rilascio) |
+| [../tests/e2e/](../tests/e2e/README.md) | Prove Playwright del front office: audit di tutte le pagine, flussi completi, reset password |
 
 ## Asset pubblici
 
