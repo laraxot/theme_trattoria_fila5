@@ -1,49 +1,54 @@
 ---
-id: trattoria-customer-flows-contract
-slug: customer-flows-contract
-title: "Contratto flussi cliente — Trattoria theme"
-description: "Contratto delle pagine pubbliche FO del tema Trattoria: home, menu, prenota, ordine. Campi form, modelli Restaurant collegati, link interni via route named Folio."
-document_type: contract
-type: contract
-category: documentation
-status: active
-module: Trattoria
-tags: [trattoria, customer-flows, contract, order, reservation, restaurant-models]
-created: "2026-11-10"
-updated: "2026-11-10"
-qmd: "trattoria customer flows contract order reservation restaurant model"
-issues: []
-discussions: []
-related:
-  - ./README.md
-  - ./navigation-integration.md
-  - ../../../Modules/Restaurant/docs/README.md
-  - ../../../Modules/Restaurant/docs/stories/STORY-TRATTORIA-01-theme-foundation.md
+title: "Trattoria customer flows contract"
+type: "technical-note"
+tags: [trattoria, menu, prenotazioni, ordini, folio]
+created: "2026-09-13"
+updated: "2026-09-13"
 ---
 
-# Contratto flussi cliente — Trattoria
+# Flussi cliente
 
-Questo documento definisce il contratto tra il tema pubblico `Trattoria`
-(FO, tenant `restaurant`) e il dominio `Restaurant` (modelli, Actions,
-database). È il riferimento unico per chi implementa pagine FO o modifica
-il flusso ordine/prenotazione.
+Le pagine Folio del tema espongono quattro superfici responsive:
 
-## Pagine pubbliche
+- `/` presenta le tre modalità di servizio;
+- `/menu` legge `ProductCategory` e `Product` attivi del modulo Restaurant;
+- `/prenota` raccoglie i campi di `Reservation` (`customer_name`, `phone`, `email`, `party_size`, `reservation_date`, `reservation_time`, `notes`);
+- `/ordine` sceglie `Order.order_type` (`dine_in`, `takeaway`, `delivery`) e passa coperti e tavolo al menu.
 
-| Pagina | Template Folio | Route | Scopo |
-|--------|---------------|-------|-------|
-| Home | `resources/views/pages/index.blade.php` | `home` | Landing del ristorante |
-| Menu | `resources/views/pages/[container0]/[slug0]/[restaurant]/index.blade.php` | `container0.index?container0=menu` | Lista piatti del ristorante attivo |
-| Prenota | `resources/views/pages/prenota.blade.php` | `container0.index?container0=prenota` | Form prenotazione tavolo |
-| Ordine | `resources/views/pages/ordine.blade.php` | `container0.index?container0=ordine` | Scelta modalità ordine + passaggio al menu |
+<<<<<<< .merge_file_5YtKg3
+Il tema non ha pagine Folio dedicate per questi flussi: tutto passa dalle pagine generiche
+`resources/views/pages/[container0]/...` che risolvono una pagina CMS (`ResolvePageAction`) e ne
+rendono i blocchi. Logica e dati: Action del modulo Restaurant, mai controller o route nel modulo.
+Fonte di verita' dettagliata: `Modules/Restaurant/docs/public-menu-table-cms.md`.
+
+| URL | Route Folio | Pagina CMS | Blocchi principali | Scopo |
+|-----|-------------|------------|--------------------|-------|
+| `/{lang}` | `home` | `home` | hero, griglie | Landing |
+| `/{lang}/menu` | `container0.index` | `menu.index` | hero, cards, `menu/categories` | Sezioni del menu |
+| `/{lang}/menu/{slug}` | `container0.view` | `menu.view` (fallback) | `public_menu` | Menu del ristorante dal QR, filtri allergeni e regimi |
+| `/{lang}/restaurants/{slug}` | `container0.view` | `restaurants.view` | `restaurant_detail` | Minisito: contatti, orari, CTA menu/prenota |
+| `/{lang}/restaurants/{slug}/menu` | `container0.container1.view` | `restaurants.menu` | hero, `menu/categories` | Menu nel minisito |
+| `/{lang}/restaurants/{slug}/book` | `container0.container1.view` | `restaurants.book` | hero, `reservation_form` | Prenotazione per quel ristorante |
+| `/{lang}/prenota` | `container0.index` | `prenota.index` | hero, `reservation_form` | Prenotazione generica |
+| `/{lang}/ordine` | `container0.index` | `ordine.index` | hero, cards | Scelta modalita' ordine |
+| `/{lang}/table/{id}/qr` | `container0.container1.view` | `table.view` | `table_order` | Ordine al tavolo da QR |
+
+`resources/views/pages/prenota.blade.php.bak` e `ordine.blade.php.bak` sono le vecchie pagine
+dedicate, sostituite dalle pagine CMS: non sono piu' servite.
 
 ## Modelli Restaurant collegati
 
-| Modello | Campo chiave | Usato in |
+Il "ristorante" e' il **tenant** del modulo User (`XotData::getTenantClass()`, chiave stringa,
+`slug`): non esiste un modello `Restaurant\Models\Restaurant`.
+
+| Modello | Campi usati | Usato in |
 |---------|-------------|----------|
-| `Restaurant\Models\Restaurant` | `id`, `slug`, `title` | Home, menu (ristorante attivo) |
-| `Restaurant\Models\Reservation` | `name`, `email`, `phone`, `party_size`, `reservation_date`, `reservation_time`, `notes`, `status` | Prenota |
-| `Restaurant\Models\Order` | `order_type` (`dine_in|takeaway|delivery`), `covers`, `table_id` | Ordine |
+| Tenant (modulo User) | `id`, `slug`, `name`, contatti, `settings` (orari, slogan, logo) | menu, minisito, prenota |
+| `Restaurant\Models\ProductCategory` | `name`, `sort_order`, `is_active`, `tenant_id` | menu |
+| `Restaurant\Models\Product` | `name`, `description`, `price`, `images`, `allergens`, `tenant_id`; `allergenCases()` | menu |
+| `Restaurant\Models\Ingredient` | `name`, `allergens` | menu (dettaglio piatto) |
+| `Restaurant\Models\Reservation` | `customer_name`, `email`, `phone`, `party_size`, `reservation_date`, `reservation_time`, `notes`, `status`, `tenant_id` | prenota |
+| `Restaurant\Models\Order` | `order_type` (`dine_in|takeaway|delivery`), `covers`, `table_id` | ordine, tavolo |
 
 ## Contratto form Prenota / book ristorante
 
@@ -110,3 +115,6 @@ Mai `url()` o percorsi hardcoded. Vedere [navigation-integration.md](navigation-
 - Se aggiungi un campo form: aggiorna questo contratto + lang + template +
   navigation-integration.md.
 - Se modifichi un modello Restaurant: sincronizza qui i campi usati.
+=======
+Le form hanno gli attributi `data-contract="restaurant.reservations.create"` e `data-contract="restaurant.orders.create"`. Il collegamento applicativo deve essere fatto tramite route Folio/Volt e Action del modulo Restaurant; il tema non duplica modelli né logica di dominio. La prenotazione usa lo stato iniziale `confirmed` previsto da `ReservationStatusEnum`.
+>>>>>>> .merge_file_q3M4L0

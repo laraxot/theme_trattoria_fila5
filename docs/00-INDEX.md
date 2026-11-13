@@ -7,19 +7,9 @@
 
 | File | Scopo |
 |------|-------|
-| [README.md](README.md) | Entrypoint docs tema, attivazione tenant, mappa cartelle |
-| [theme.md](theme.md) | Palette, tipografia, classi CSS, layout e convenzioni routing Folio |
-| [customer-flows-contract.md](customer-flows-contract.md) | Contratto pagine pubbliche (`/`, `/menu`, `/prenota`, `/ordine`) e campi form |
-| [navigation-integration.md](navigation-integration.md) | Vincoli navigazione e label/icone Filament |
-
-## BMAD + Second Brain
-
-| Path | Scopo |
-|------|-------|
-| [bmad/](bmad/) | Filament blueprint tema e note BMAD |
-| [bmad/filament-blueprint.md](bmad/filament-blueprint.md) | Confini XotBase/Filament, FO Folio, integrazione Restaurant |
-| [stories/](stories/) | Story BMAD epic `E-TRATTORIA-1` |
-| [../../../../docs/wiki/memories/restaurant-autocoscienza-tooling-and-docs.md](../../../../docs/wiki/memories/restaurant-autocoscienza-tooling-and-docs.md) | Memoria operativa progetto (tooling, env, log, symlink) |
+| [theme.md](theme.md) | Palette colori, tipografia, classi CSS e layout realmente implementati |
+| [customer-flows-contract.md](customer-flows-contract.md) | Contratto delle 4 pagine pubbliche (`/`, `/menu`, `/prenota`, `/ordine`) e dei campi form collegati ai model Restaurant |
+| [navigation-integration.md](navigation-integration.md) | Vincoli per l'integrazione della navigazione con le label/icone fornite da Filament |
 
 ## Stories
 
@@ -35,6 +25,4 @@ singoli file per stato, criteri di accettazione e tracciamento GitHub.
 
 ---
 
-**Ultimo aggiornamento**: 2026-11-10
-
-> Punto di ingresso aggiornato: vedi [README.md](README.md). Questo indice resta per i link storici.
+**Ultimo aggiornamento**: 2026-09-17
