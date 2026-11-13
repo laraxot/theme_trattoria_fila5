@@ -1,57 +1,48 @@
 <?php
 
-use function Laravel\Folio\name;
-use Livewire\Volt\Component;
-use Livewire\Attributes\Validate;
+declare(strict_types=1);
 
+use Livewire\Attributes\Validate;
+use Livewire\Volt\Component;
+
+use function Laravel\Folio\{middleware, name};
+
+/*
+ * Conferma della password prima di un'operazione delicata (middleware `password.confirm`).
+ */
+middleware(['auth']);
 name('password.confirm');
 
-new class extends Component
-{
+new class extends Component {
     #[Validate('required|current_password')]
-    public $password = '';
+    public string $password = '';
 
-    public function confirm()
+    public function confirm(): mixed
     {
         $this->validate();
-
         session()->put('auth.password_confirmed_at', time());
 
-        return redirect()->intended('/');
+        return redirect()->intended(url('/'.app()->getLocale()));
     }
 };
-
 ?>
-
 <x-layouts.main>
-    <div class="flex flex-col items-stretch justify-center w-screen min-h-screen py-10 sm:items-center">
+    <section class="section auth">
+        <div class="container auth__container">
+            <p class="eyebrow">{{ __('pub_theme::auth.login.eyebrow') }}</p>
+            <h1>{{ __('pub_theme::auth.confirm.title') }}</h1>
+            <p class="lead">{{ __('pub_theme::auth.confirm.lead') }}</p>
 
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <x-ui.link href="{{ route('home') }}">
-                <x-ui.logo class="w-auto h-10 mx-auto text-gray-700 fill-current dark:text-gray-100" />
-            </x-ui.link>
-
-            <h2 class="mt-5 text-2xl font-extrabold leading-9 text-center text-gray-800 dark:text-gray-200">
-                Confirm your password
-            </h2>
-            <p class="text-sm leading-5 text-center text-gray-600 dark:text-gray-400 space-x-0.5">
-                Please confirm your password before continuing
-            </p>
-        </div>
-
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="px-10 py-0 sm:py-8 sm:shadow-sm sm:bg-white dark:sm:bg-gray-950/50 dark:border-gray-200/10 sm:border sm:rounded-lg border-gray-200/60">
-                @volt('auth.password.confirm')
-                <form wire:submit="confirm" class="space-y-6">
-                    <x-ui.input label="Password" type="password" id="password" name="password" wire:model="password" />
-                    <div class="flex items-center justify-end text-sm">
-                        <x-ui.text-link href="{{ route('password.request') }}">Forgot your password?</x-ui.text-link>
+            @volt('auth.password.confirm')
+                <form wire:submit="confirm" class="form-card form-grid" novalidate>
+                    <div class="field">
+                        <label for="password">{{ __('pub_theme::auth.fields.password') }}</label>
+                        <input id="password" type="password" wire:model="password" autocomplete="current-password" required autofocus @error('password') aria-invalid="true" aria-describedby="password-error" @enderror>
+                        @error('password')<p id="password-error" class="field__error" role="alert">{{ $message }}</p>@enderror
                     </div>
-                    <x-ui.button type="primary" rounded="md" submit="true">Confirm password</x-ui.button>
+                    <button type="submit" class="button button--primary" wire:loading.attr="disabled">{{ __('pub_theme::auth.confirm.submit') }}</button>
                 </form>
-                @endvolt
-            </div>
+            @endvolt
         </div>
-    </div>
-
+    </section>
 </x-layouts.main>

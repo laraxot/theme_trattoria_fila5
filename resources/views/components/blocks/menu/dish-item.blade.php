@@ -2,20 +2,22 @@
     Piatto del menu pubblico, card stile vetrina (foto grande in alto, nome, prezzo,
     badge dieta e chip allergeni con tooltip). Il <details> nativo apre il dettaglio:
     gallery, descrizione, ingredienti e badge completi — nessun JS richiesto.
-    Variabile: $dish = ['product' => Product, 'allergens' => list<AllergenEnum>]
-    Immagini: `products.images` JSON, path relativi a `assets/Restaurant/` (public del modulo).
+    Variabile: $dish = ['product' => Product, 'allergens' => list<AllergenEnum>, 'available' => bool]
+    `available` false = esaurito oggi: il piatto resta nel menu con l'etichetta "Esaurito".
+    Immagini: `Product::imageUrls()` (foto caricate dal ristoratore o demo del modulo).
 --}}
 @php
     $product = $dish['product'];
-    $images = array_values(array_filter((array) ($product->images ?? [])));
+    $images = $product->imageUrls();
     $euCases = array_values(array_filter($dish['allergens'], static fn ($case) => ! in_array($case, \Modules\Restaurant\Enums\AllergenEnum::dietaryCases(), true)));
     $dietCases = array_values(array_filter($dish['allergens'], static fn ($case) => in_array($case, \Modules\Restaurant\Enums\AllergenEnum::dietaryCases(), true)));
+    $soldOut = ($dish['available'] ?? true) === false;
 @endphp
-<details class="dish">
+<details @class(['dish', 'dish--soldout' => $soldOut])>
     <summary class="dish__summary">
         <span class="dish__media">
             @if ($images !== [])
-                <img class="dish__photo" src="{{ asset('assets/Restaurant/'.e($images[0])) }}" alt="{{ $product->name }}" loading="lazy">
+                <img class="dish__photo" src="{{ $images[0] }}" alt="{{ $product->name }}" loading="lazy">
             @else
                 <span class="dish__photo dish__photo--empty" aria-hidden="true"><x-icon name="restaurant-menu" /></span>
             @endif
@@ -24,6 +26,9 @@
         <span class="dish__main">
             <span class="dish__head">
                 <span class="dish__name">{{ $product->name }}</span>
+                @if ($soldOut)
+                    <span class="dish__soldout">{{ __('restaurant::public_menu.dish.sold_out.label') }}</span>
+                @endif
                 <span class="dish__toggle" aria-hidden="true">+</span>
             </span>
             @if (filled($product->description))
@@ -49,7 +54,7 @@
         @if ($images !== [])
             <ul class="dish__gallery" aria-label="{{ $product->name }}">
                 @foreach ($images as $image)
-                    <li><img src="{{ asset('assets/Restaurant/'.e($image)) }}" alt="{{ $product->name }}" loading="lazy"></li>
+                    <li><img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy"></li>
                 @endforeach
             </ul>
         @endif

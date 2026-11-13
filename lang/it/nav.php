@@ -12,5 +12,10 @@ return [
     'open_menu' => 'Apri il menu',
     'main_menu' => 'Menu principale',
     'skip_to_content' => 'Vai al contenuto',
+    'table_region' => 'Tabella, scorri di lato per leggerla tutta',
     'close_menu' => 'Chiudi il menu',
+    'login' => 'Accedi',
+    'logout' => 'Esci',
+    'work_areas' => 'Le tue aree di lavoro',
+    'account_menu' => 'Menu di :name',
 ];

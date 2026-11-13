@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+use function Laravel\Folio\name;
 use Livewire\Volt\Component;
 use Modules\Cms\Actions\ResolvePageAction;
+
+// Nome usato per i link firmati del QR del tavolo (IssueTableOrderUrlAction).
+name('container0.container1.container2.view');
 
 new class extends Component {
     public string $container0 = '';
@@ -42,7 +46,6 @@ new class extends Component {
         $this->pageSlug = $resolved->pageSlug;
 
         $item = $resolved->item;
-        $predictId = is_object($item) && isset($item->id) ? $item->id : null;
 
         $this->data = [
             'container0' => $container0,
@@ -52,7 +55,6 @@ new class extends Component {
             'slug1' => $slug1,
             'container2' => $container2,
             'item' => $item,
-            'predictId' => $predictId,
         ];
     }
 };

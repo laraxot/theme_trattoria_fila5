@@ -2,14 +2,20 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
 use Modules\Restaurant\Actions\Menu\FindPublicRestaurantAction;
 use Modules\Restaurant\Actions\Menu\GetPublicMenuAction;
 use Modules\Restaurant\Actions\Order\CreateCustomerOrderAction;
 use Modules\Restaurant\Actions\Order\SendOrderToStationsAction;
-use Modules\Restaurant\Models\DiningTable;
+use Modules\Restaurant\Actions\Table\IsTableOrderingEnabledAction;
+use Modules\Restaurant\Actions\Table\ResolveRestaurantTableAction;
+use Modules\Restaurant\Actions\Table\VerifyTableOrderRequestAction;
+use Modules\Restaurant\Exceptions\RestaurantException;
 use Modules\Restaurant\Models\ProductModifier;
 
 /*
@@ -17,7 +23,16 @@ use Modules\Restaurant\Models\ProductModifier;
  * (`/{lang}/restaurants/{slug}/table/{num}/order`, pagina CMS `restaurants.table_order`).
  *
  * - Ristorante: `slug0` → FindPublicRestaurantAction (404 se sconosciuto).
- * - Tavolo: `slug1` → DiningTable attivo per id o nome (404 altrimenti).
+ * - Tavolo: `slug1` → ResolveRestaurantTableAction, solo tra i tavoli di **quel** ristorante.
+ * - Link del QR firmato (IssueTableOrderUrlAction) con `v` = versione del QR del tavolo:
+ *   firma assente/errata, QR vecchio, tavolo o ristorante sconosciuti → sempre lo stesso 404.
+ * - Ristorante, tavolo, menu e chiave di idempotenza sono #[Locked]: il browser non puo'
+ *   cambiarli tra una richiesta Livewire e l'altra (prima si poteva cambiare `tableId`).
+ * - Piatti esauriti (`is_available` false) non si offrono; se finiscono mentre il cliente
+ *   ordina, messaggio chiaro invece di un errore.
+ * - Ordini dal tavolo spenti per il ristorante (IsTableOrderingEnabledAction): il QR porta al menu
+ *   pubblico `/menu/{slug}`; se vengono spenti mentre il cliente ordina, l'invio e' rifiutato.
+ * - Al massimo 10 invii ogni 10 minuti per IP e tavolo.
  * - Menu: solo prodotti del tenant via GetPublicMenuAction; i modificatori
  *   arrivano da `product_modifiers` attivi del stesso prodotto.
  * - Carrello: qty + note libere + modificatori selezionati. `submit()` invia
@@ -27,10 +42,16 @@ use Modules\Restaurant\Models\ProductModifier;
  * - `idempotencyKey` generata a mount: refresh/doppio submit non duplicano.
  */
 new class extends Component {
+    #[Locked]
     public string $restaurantName = '';
 
+    #[Locked]
     public string $tableName = '';
 
+    #[Locked]
+    public string $restaurantSlug = '';
+
+    #[Locked]
     /** @var array<int, array{id: int, name: string, price: float, description: string, images: list<string>, modifiers: list<array{id: int, name: string, price_delta: float}>}> */
     public array $menu = [];
 
@@ -50,16 +71,30 @@ new class extends Component {
 
     public float $orderTotal = 0.0;
 
+    #[Locked]
     public int $tableId = 0;
 
+    #[Locked]
     public string $idempotencyKey = '';
 
     public function mount(): void
     {
-        $restaurant = app(FindPublicRestaurantAction::class)->execute((string) request()->route('slug0', ''));
-        $table = $this->resolveTable((string) request()->route('slug1', ''));
-        abort_if($table === null, 404);
+        try {
+            $restaurant = app(FindPublicRestaurantAction::class)->execute((string) request()->route('slug0', ''));
+        } catch (ModelNotFoundException) {
+            abort(404);
+        }
+        $table = app(ResolveRestaurantTableAction::class)->execute($restaurant, (string) request()->route('slug1', ''));
+        abort_if($table === null || ! app(VerifyTableOrderRequestAction::class)->execute(request(), $table), 404);
 
+        // Ordini dal tavolo spenti: il QR resta valido e porta al menu del ristorante.
+        if (! app(IsTableOrderingEnabledAction::class)->execute($restaurant)) {
+            $this->redirect(route('container0.view', ['container0' => 'menu', 'slug0' => (string) $restaurant->getAttribute('slug')]));
+
+            return;
+        }
+
+        $this->restaurantSlug = (string) $restaurant->getAttribute('slug');
         $this->restaurantName = (string) $restaurant->getAttribute('name');
         $this->tableName = (string) $table->name;
         $this->tableId = (int) $table->id;
@@ -69,6 +104,9 @@ new class extends Component {
         $products = [];
         foreach (app(GetPublicMenuAction::class)->execute($restaurant) as $section) {
             foreach ($section['dishes'] as $dish) {
+                if (! $dish['available']) {
+                    continue;
+                }
                 $products[(int) $dish['product']->id] = $dish['product'];
             }
         }
@@ -86,7 +124,7 @@ new class extends Component {
                 'name' => (string) $product->name,
                 'price' => (float) $product->price,
                 'description' => (string) ($product->description ?? ''),
-                'images' => array_values(array_map('strval', (array) ($product->images ?? []))),
+                'images' => $product->imageUrls(),
                 'modifiers' => $modifiers->get($product->id, collect())->map(static fn (ProductModifier $m): array => [
                     'id' => (int) $m->id,
                     'name' => (string) $m->name,
@@ -96,19 +134,6 @@ new class extends Component {
         }
     }
 
-    private function resolveTable(string $ref): ?DiningTable
-    {
-        $query = DiningTable::query()->where('is_active', true);
-
-        if (ctype_digit($ref)) {
-            $table = (clone $query)->find((int) $ref);
-            if ($table !== null) {
-                return $table;
-            }
-        }
-
-        return $query->where('name', $ref)->first();
-    }
 
     public function inc(int $productId): void
     {
@@ -140,10 +165,31 @@ new class extends Component {
 
     public function submit(): void
     {
+        $key = 'table-order:'.$this->tableId.':'.request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 10)) {
+            $this->addError('order', __('pub_theme::table_order.too_many'));
+
+            return;
+        }
+
         $this->validate([
             'covers' => ['required', 'integer', 'min:1', 'max:12'],
             'cart' => ['required', 'array', 'min:1'],
+            'cart.*.qty' => ['integer', 'min:0', 'max:20'],
+            'cart.*.notes' => ['nullable', 'string', 'max:255'],
         ]);
+        RateLimiter::hit($key, 600);
+
+        try {
+            $restaurant = app(FindPublicRestaurantAction::class)->execute($this->restaurantSlug);
+        } catch (ModelNotFoundException) {
+            $restaurant = null;
+        }
+        if ($restaurant === null || ! app(IsTableOrderingEnabledAction::class)->execute($restaurant)) {
+            $this->addError('order', __('pub_theme::table_order.ordering_off'));
+
+            return;
+        }
 
         $items = [];
         foreach ($this->cart as $productId => $row) {
@@ -179,19 +225,31 @@ new class extends Component {
             return;
         }
 
-        $order = app(CreateCustomerOrderAction::class)->execute(
-            $this->tableId,
-            $this->idempotencyKey,
-            $items,
-            (int) $this->covers,
-        );
+        try {
+            $order = app(CreateCustomerOrderAction::class)->execute(
+                $this->tableId,
+                $this->idempotencyKey,
+                $items,
+                (int) $this->covers,
+            );
+        } catch (RestaurantException|InvalidArgumentException|ModelNotFoundException) {
+            // Piatto finito o ritirato mentre il cliente ordinava, o tavolo disattivato.
+            $this->addError('order', __('pub_theme::table_order.unavailable'));
+
+            return;
+        }
 
         try {
             app(SendOrderToStationsAction::class)->execute($order->id);
             $this->sentToStations = true;
         } catch (\Throwable $e) {
-            $this->sendWarning = $e->getMessage();
+            // L'ordine e' salvato: lo staff lo vede e puo' rinviarlo. Al cliente niente dettagli tecnici.
+            report($e);
+            $this->sendWarning = __('pub_theme::table_order.send_failed_generic');
         }
+
+        // Nuova chiave: un secondo giro d'ordine dallo stesso tavolo non e' un doppio invio.
+        $this->idempotencyKey = 'qr-'.$this->tableId.'-'.Str::uuid()->toString();
 
         $this->orderTotal = (float) $order->total;
         $this->sent = true;
@@ -273,7 +331,7 @@ new class extends Component {
                     @if ($sentToStations)
                         <p class="hint">{{ __('pub_theme::table_order.sent_stations') }}</p>
                     @elseif ($sendWarning !== '')
-                        <p class="hint" role="alert">{{ __('pub_theme::table_order.send_failed', ['error' => $sendWarning]) }}</p>
+                        <p class="hint" role="alert">{{ $sendWarning }}</p>
                     @endif
                     @if ($orderTotal > 0)
                         <p>{{ __('pub_theme::table_order.sent_total', ['total' => Number::currency($orderTotal, 'EUR', app()->getLocale())]) }}</p>
@@ -286,7 +344,7 @@ new class extends Component {
                             <article class="dish dish--order">
                                 <div class="dish__media">
                                     @if ($dish['images'] !== [])
-                                        <img class="dish__photo" src="{{ asset('assets/Restaurant/'.e($dish['images'][0])) }}" alt="{{ $dish['name'] }}" loading="lazy">
+                                        <img class="dish__photo" src="{{ $dish['images'][0] }}" alt="{{ $dish['name'] }}" loading="lazy">
                                     @else
                                         <span class="dish__photo dish__photo--empty" aria-hidden="true"><x-icon name="restaurant-menu" /></span>
                                     @endif

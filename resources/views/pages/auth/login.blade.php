@@ -1,78 +1,90 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Auth\Events\Login;
-use function Laravel\Folio\{middleware, name};
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
+use function Laravel\Folio\{middleware, name};
+
+/*
+ * Accesso dal sito (`/{lang}/auth/login`): clienti, ristoratori e personale. Il link "Accedi"
+ * dell'header porta qui; dopo l'accesso l'avatar dell'header elenca le aree di lavoro dell'utente.
+ * L'evento Login lo emette gia' Auth::attempt(). Massimo 5 tentativi al minuto per email e IP.
+ */
 middleware(['guest']);
 name('login');
 
-new class extends Component
-{
+new class extends Component {
     #[Validate('required|email')]
-    public $email = '';
+    public string $email = '';
 
     #[Validate('required')]
-    public $password = '';
+    public string $password = '';
 
-    public $remember = false;
+    public bool $remember = false;
 
-    public function authenticate()
+    public function authenticate(): mixed
     {
         $this->validate();
 
-        if (!Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            $this->addError('email', trans('auth.failed'));
+        $key = 'login:'.Str::lower($this->email).'|'.request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $this->addError('email', __('auth.throttle', ['seconds' => RateLimiter::availableIn($key)]));
 
-            return;
+            return null;
         }
 
-        event(new Login(auth()->guard('web'), User::where('email', $this->email)->first(), $this->remember));
+        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+            RateLimiter::hit($key, 60);
+            $this->addError('email', __('auth.failed'));
 
-        return redirect()->intended('/');
+            return null;
+        }
+
+        RateLimiter::clear($key);
+        session()->regenerate();
+
+        return redirect()->intended(url('/'.app()->getLocale()));
     }
 };
-
 ?>
-
 <x-layouts.main>
+    <section class="section auth">
+        <div class="container auth__container">
+            <p class="eyebrow">{{ __('pub_theme::auth.login.eyebrow') }}</p>
+            <h1>{{ __('pub_theme::auth.login.title') }}</h1>
+            <p class="lead">{{ __('pub_theme::auth.login.lead') }}</p>
 
-    <div class="flex flex-col items-stretch justify-center w-screen min-h-screen py-10 sm:items-center">
-
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <x-ui.link href="{{ route('home') }}">
-                <x-ui.logo class="w-auto h-10 mx-auto text-gray-700 fill-current dark:text-gray-100" />
-            </x-ui.link>
-
-            <h2 class="mt-5 text-2xl font-extrabold leading-9 text-center text-gray-800 dark:text-gray-200">Sign in to
-                your account</h2>
-            <div class="text-sm leading-5 text-center text-gray-600 dark:text-gray-400 space-x-0.5">
-                <span>Or</span>
-                <x-ui.text-link href="{{ route('register') }}">create a new account</x-ui.text-link>
-            </div>
-        </div>
-
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="px-10 py-0 sm:py-8 sm:shadow-sm sm:bg-white dark:sm:bg-gray-950/50 dark:border-gray-200/10 sm:border sm:rounded-lg border-gray-200/60">
-                @volt('auth.login')
-                <form wire:submit="authenticate" class="space-y-6">
-
-                    <x-ui.input label="Email address" type="email" id="email" name="email" wire:model="email" />
-                    <x-ui.input label="Password" type="password" id="password" name="password" wire:model="password" />
-
-                    <div class="flex items-center justify-between mt-6 text-sm leading-5">
-                        <x-ui.checkbox label="Remember me" id="remember" name="remember" wire:model="remember" />
-                        <x-ui.text-link href="{{ route('password.request') }}">Forgot your password?</x-ui.text-link>
+            @volt('auth.login')
+                <form wire:submit="authenticate" class="form-card form-grid" novalidate>
+                    <div class="field">
+                        <label for="email">{{ __('pub_theme::auth.fields.email') }}</label>
+                        <input id="email" type="email" wire:model="email" autocomplete="email" required autofocus @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
+                        @error('email')<p id="email-error" class="field__error" role="alert">{{ $message }}</p>@enderror
                     </div>
-
-                    <x-ui.button type="primary" rounded="md" submit="true">Sign in</x-ui.button>
+                    <div class="field">
+                        <label for="password">{{ __('pub_theme::auth.fields.password') }}</label>
+                        <input id="password" type="password" wire:model="password" autocomplete="current-password" required @error('password') aria-invalid="true" @enderror>
+                        @error('password')<p class="field__error" role="alert">{{ $message }}</p>@enderror
+                    </div>
+                    <label class="auth__remember">
+                        <input type="checkbox" wire:model="remember">
+                        <span>{{ __('pub_theme::auth.fields.remember') }}</span>
+                    </label>
+                    <button type="submit" class="button button--primary" wire:loading.attr="disabled">{{ __('pub_theme::auth.login.submit') }}</button>
+                    <p class="auth__links">
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}">{{ __('pub_theme::auth.login.forgot') }}</a>
+                        @endif
+                        <a href="{{ route('register') }}">{{ __('pub_theme::auth.login.register') }}</a>
+                    </p>
                 </form>
-                @endvolt
-            </div>
+            @endvolt
         </div>
-
-    </div>
-
+    </section>
 </x-layouts.main>
