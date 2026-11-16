@@ -27,9 +27,7 @@ new class extends Component {
         $this->container0 = $container0;
         $this->slug0 = $slug0;
 
-        file_put_contents(storage_path('logs/dbg404.log'), 'mount2 container0='.$container0.' slug0='.$slug0.' url='.request()->fullUrl()."\n", FILE_APPEND);
         $resolved = app(ResolvePageAction::class)->execute($container0, $slug0);
-        file_put_contents(storage_path('logs/dbg404.log'), '  resolved pageSlug='.$resolved->pageSlug.' item='.(is_object($resolved->item)?get_class($resolved->item):'null').' slugExists='.var_export(PageModel::query()->where('slug',$resolved->pageSlug)->exists(),true).' count='.PageModel::count()."\n", FILE_APPEND);
 
         // Pagina CMS inesistente (ne' `contenitore.slug` ne' `contenitore.view`): 404 invece di una pagina vuota.
         abort_if($resolved->item === null && ! PageModel::query()->where('slug', $resolved->pageSlug)->exists(), 404);
