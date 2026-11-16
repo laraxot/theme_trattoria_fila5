@@ -15,6 +15,20 @@
                     <a class="button button--ghost" href="{{ route('container0.index', ['container0' => 'prenota']) }}">{{ __('pub_theme::home.book_table') }}</a>
                 </div>
             </div>
+            {{-- Anteprima illustrativa di un menu con filtro allergeni: decorativa, nascosta ai lettori di schermo. --}}
+            <div class="hero-preview" aria-hidden="true">
+                <p class="hero-preview__filter">{{ __('pub_theme::home.preview.filter') }} <span class="hero-preview__pill">{{ __('pub_theme::home.preview.gluten') }}</span> <span class="hero-preview__pill">{{ __('pub_theme::home.preview.milk') }}</span></p>
+                @foreach (['one', 'two', 'three'] as $item)
+                    <div class="hero-preview__dish">
+                        <span>
+                            <strong>{{ __('pub_theme::home.preview.dishes.'.$item.'.name') }}</strong>
+                            <small>{{ __('pub_theme::home.preview.dishes.'.$item.'.tags') }}</small>
+                        </span>
+                        <span class="hero-preview__price">{{ __('pub_theme::home.preview.dishes.'.$item.'.price') }}</span>
+                    </div>
+                @endforeach
+                <p class="hero-preview__qr"><span class="hero-preview__qr-icon"></span>{{ __('pub_theme::home.preview.qr') }}</p>
+            </div>
         </div>
     </section>
 
@@ -22,7 +36,7 @@
         <div class="container">
             <h2>{{ __('pub_theme::home.how_it_works') }}</h2>
             <p class="lead">{{ __('pub_theme::home.how_it_works_lead') }}</p>
-            <div class="cards" style="margin-top:1.5rem">
+            <div class="cards cards--spaced">
                 @foreach (['menu' => ['container0.index', ['container0' => 'menu']], 'book' => ['container0.index', ['container0' => 'prenota']], 'table' => ['container0.index', ['container0' => 'ordine']]] as $key => [$routeName, $params])
                     <a class="card" href="{{ route($routeName, $params) }}">
                         <h3>{{ __('pub_theme::home.steps.'.$key.'.title') }}</h3>

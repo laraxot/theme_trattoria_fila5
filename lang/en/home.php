@@ -36,4 +36,15 @@ return [
         'contact' => 'Contact us',
         'login' => 'Restaurant owner login',
     ],
+    'preview' => [
+        'filter' => 'Without',
+        'gluten' => 'gluten',
+        'milk' => 'milk',
+        'dishes' => [
+            'one' => ['name' => 'Spelt and vegetable salad', 'tags' => 'Vegan · dairy free', 'price' => '€9.00'],
+            'two' => ['name' => 'Mushroom risotto', 'tags' => 'Gluten free · vegetarian', 'price' => '€13.50'],
+            'three' => ['name' => 'Oven-baked sea bass', 'tags' => 'Fish · gluten free', 'price' => '€18.00'],
+        ],
+        'qr' => 'Table 4 · order from the QR',
+    ],
 ];

@@ -36,4 +36,15 @@ return [
         'contact' => 'Contattaci',
         'login' => 'Accedi all\'area ristoratore',
     ],
+    'preview' => [
+        'filter' => 'Senza',
+        'gluten' => 'glutine',
+        'milk' => 'latte',
+        'dishes' => [
+            'one' => ['name' => 'Insalata di farro e verdure', 'tags' => 'Vegana · senza latte', 'price' => '9,00 €'],
+            'two' => ['name' => 'Risotto ai funghi', 'tags' => 'Senza glutine · vegetariano', 'price' => '13,50 €'],
+            'three' => ['name' => 'Branzino al forno', 'tags' => 'Pesce · senza glutine', 'price' => '18,00 €'],
+        ],
+        'qr' => 'Tavolo 4 · ordina dal QR',
+    ],
 ];

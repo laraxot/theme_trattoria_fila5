@@ -346,7 +346,7 @@ new class extends Component {
                                     @if ($dish['images'] !== [])
                                         <img class="dish__photo" src="{{ $dish['images'][0] }}" alt="{{ $dish['name'] }}" loading="lazy">
                                     @else
-                                        <span class="dish__photo dish__photo--empty" aria-hidden="true"><x-icon name="restaurant-menu" /></span>
+                                        <span class="dish__photo dish__photo--empty" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M17 21V3c-2 1.5-3 4-3 7v3h3"/></svg></span>
                                     @endif
                                     <span class="dish__price">{{ Number::currency($dish['price'], 'EUR', app()->getLocale()) }}</span>
                                 </div>
