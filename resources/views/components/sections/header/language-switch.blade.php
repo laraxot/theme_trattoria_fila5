@@ -10,7 +10,7 @@
 @if ($currentLink !== null)
     <details class="lang-switch">
         <summary class="lang-switch__toggle" aria-label="{{ __('restaurant::public_restaurants.language.switch.label') }}">
-            <span class="lang-switch__flag" aria-hidden="true">@svg('lang-flag/'.$currentLink['flag'], 'lang-switch__flag-icon', ['width' => 20, 'height' => 20, 'aria-hidden' => 'true', 'focusable' => 'false'])</span>
+            <span class="lang-switch__flag" aria-hidden="true">@svg('ui-flags.'.$currentLink['flag'], 'lang-switch__flag-icon', ['width' => 20, 'height' => 20, 'aria-hidden' => 'true', 'focusable' => 'false'])</span>
             <span class="lang-switch__code">{{ strtoupper($currentLink['locale']) }}</span>
             <span class="lang-switch__chevron" aria-hidden="true">▾</span>
         </summary>
@@ -18,7 +18,7 @@
             @foreach ($languageLinks as $link)
                 <li>
                     <a class="lang-switch__item" href="{{ $link['url'] }}" hreflang="{{ $link['locale'] }}" @if ($link['current']) aria-current="true" @endif>
-                        <span class="lang-switch__flag" aria-hidden="true">@svg('lang-flag/'.$link['flag'], 'lang-switch__flag-icon', ['width' => 20, 'height' => 20, 'aria-hidden' => 'true', 'focusable' => 'false'])</span>
+                        <span class="lang-switch__flag" aria-hidden="true">@svg('ui-flags.'.$link['flag'], 'lang-switch__flag-icon', ['width' => 20, 'height' => 20, 'aria-hidden' => 'true', 'focusable' => 'false'])</span>
                         <span class="lang-switch__name">{{ $link['label'] }}</span>
                         @if ($link['current'])<span class="lang-switch__check" aria-hidden="true">✓</span>@endif
                     </a>
