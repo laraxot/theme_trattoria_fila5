@@ -45,6 +45,6 @@
 @else
     <a class="user-login" href="{{ route('login') }}">
         <span class="user-login__icon" aria-hidden="true">👤</span>
-        <span>{{ __('pub_theme::nav.login') }}</span>
+        <span class="user-login__label">{{ __('pub_theme::nav.login') }}</span>
     </a>
 @endauth

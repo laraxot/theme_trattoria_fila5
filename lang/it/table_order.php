@@ -12,6 +12,8 @@ return [
     'footer_note' => 'Mostrato via QR sul segnatavolo del tavolo.',
     'form_title' => 'Ordina al tavolo :table',
     'form_lead' => 'Sfoglia il menu, scegli i piatti e invia l\'ordine: arriva direttamente in cucina.',
+    'bar_count' => '{1} :count piatto|[2,*] :count piatti',
+    'bar_cta' => 'Vedi e invia',
     'cart_title' => 'Il tuo ordine',
     'cart_empty' => 'Il carrello è vuoto: tocca + sui piatti che vuoi ordinare.',
     'total_label' => 'Totale',

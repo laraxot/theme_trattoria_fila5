@@ -73,7 +73,7 @@
                 </div>
                 <div class="dish-grid">
                     @foreach ($section['dishes'] as $dish)
-                        @include('pub_theme::components.blocks.menu.dish-item', ['dish' => $dish])
+                        @include('pub_theme::components.blocks.menu.dish-item', ['dish' => $dish, 'eager' => $loop->parent?->first && $loop->index < 2])
                     @endforeach
                 </div>
             </section>

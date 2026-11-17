@@ -5,6 +5,7 @@
     Variabile: $dish = ['product' => Product, 'allergens' => list<AllergenEnum>, 'available' => bool]
     `available` false = esaurito oggi: il piatto resta nel menu con l'etichetta "Esaurito".
     Immagini: `Product::imageUrls()` (foto caricate dal ristoratore o demo del modulo).
+    $eager (opzionale) = primi piatti visibili: foto caricata subito e con priorita' (LCP su telefono), le altre in lazy.
 --}}
 @php
     $product = $dish['product'];
@@ -17,7 +18,7 @@
     <summary class="dish__summary">
         <span class="dish__media">
             @if ($images !== [])
-                <img class="dish__photo" src="{{ $images[0] }}" alt="{{ $product->name }}" loading="lazy">
+                <img class="dish__photo" src="{{ $images[0] }}" alt="{{ $product->name }}" width="960" height="720" decoding="async" @if ($eager ?? false) fetchpriority="high" @else loading="lazy" @endif>
             @else
                 <span class="dish__photo dish__photo--empty" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M17 21V3c-2 1.5-3 4-3 7v3h3"/></svg></span>
             @endif
