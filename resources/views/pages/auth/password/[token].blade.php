@@ -1,92 +1,100 @@
 <?php
 
-use Illuminate\Support\Str;
+declare(strict_types=1);
+
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Auth\Events\PasswordReset;
-
-use function Laravel\Folio\name;
-
-use Livewire\Volt\Component;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
+use Livewire\Volt\Component;
 
+use function Laravel\Folio\{middleware, name};
+
+/*
+ * Nuova password dal link ricevuto per email (`/{lang}/auth/password/{token}?email=...`).
+ * Dopo il cambio l'utente e' gia' dentro e torna alla home nella sua lingua.
+ */
+middleware(['guest']);
 name('password.reset');
 
-new class extends Component
-{
-    #[Validate('required')]
-    public $token;
+new class extends Component {
+    #[Locked]
+    public string $token = '';
 
     #[Validate('required|email')]
-    public $email;
+    public string $email = '';
 
     #[Validate('required|min:8|same:passwordConfirmation')]
-    public $password;
-    public $passwordConfirmation;
+    public string $password = '';
 
-    public function mount($token)
+    public string $passwordConfirmation = '';
+
+    public function mount(string $token): void
     {
-        $this->email = request()->query('email', '');
         $this->token = $token;
+        $email = request()->query('email', '');
+        $this->email = \is_string($email) ? $email : '';
     }
 
-    public function resetPassword()
+    public function resetPassword(): mixed
     {
         $this->validate();
 
-        $response = Password::broker()->reset(
-            [
-                'token' => $this->token,
-                'email' => $this->email,
-                'password' => $this->password,
-            ],
-            function ($user, $password) {
-                $user->password = Hash::make($password);
-
-                $user->setRememberToken(Str::random(60));
-
-                $user->save();
-
+        $status = Password::broker()->reset(
+            ['token' => $this->token, 'email' => $this->email, 'password' => $this->password],
+            function ($user, string $password): void {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
                 event(new PasswordReset($user));
-
                 Auth::guard()->login($user);
             },
         );
 
-        if ($response == Password::PASSWORD_RESET) {
-            session()->flash(trans($response));
+        if ($status !== Password::PASSWORD_RESET) {
+            $this->addError('email', __($status));
 
-            return redirect('/');
+            return null;
         }
 
-        $this->addError('email', trans($response));
+        session()->regenerate();
+        session()->flash('status', __($status));
+
+        return redirect(url('/'.app()->getLocale()));
     }
 };
-
 ?>
-
 <x-layouts.main>
-    <div class="flex flex-col items-stretch justify-center w-screen min-h-screen py-10 sm:items-center">
+    <section class="section auth">
+        <div class="container auth__container">
+            <p class="eyebrow">{{ __('pub_theme::auth.login.eyebrow') }}</p>
+            <h1>{{ __('pub_theme::auth.reset.title') }}</h1>
+            <p class="lead">{{ __('pub_theme::auth.reset.lead') }}</p>
 
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <x-ui.link href="{{ route('home') }}">
-                <x-ui.logo class="w-auto h-10 mx-auto text-gray-700 fill-current dark:text-gray-100" />
-            </x-ui.link>
-            <h2 class="mt-5 text-2xl font-extrabold leading-9 text-center text-gray-800 dark:text-gray-200">Reset
-                password</h2>
-        </div>
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="px-10 py-0 sm:py-8 sm:shadow-sm sm:bg-white dark:sm:bg-gray-950/50 dark:border-gray-200/10 sm:border sm:rounded-lg border-gray-200/60">
-                @volt('auth.password.token')
-                <form wire:submit="resetPassword" class="space-y-6">
-                    <x-ui.input label="Email address" type="email" id="email" name="email" wire:model="email" />
-                    <x-ui.input label="Password" type="password" id="password" name="password" wire:model="password" />
-                    <x-ui.input label="Confirm Password" type="password" id="password_confirmation" name="password_confirmation" wire:model="passwordConfirmation" />
-                    <x-ui.button type="primary" rounded="md" submit="true">Reset password</x-ui.button>
+            @volt('auth.password.token')
+                <form wire:submit="resetPassword" class="form-card form-grid" novalidate>
+                    <div class="field">
+                        <label for="email">{{ __('pub_theme::auth.fields.email') }}</label>
+                        <input id="email" type="email" wire:model="email" autocomplete="email" required @error('email') aria-invalid="true" aria-describedby="email-error" @enderror>
+                        @error('email')<p id="email-error" class="field__error" role="alert">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="field">
+                        <label for="password">{{ __('pub_theme::auth.fields.new_password') }}</label>
+                        <input id="password" type="password" wire:model="password" autocomplete="new-password" required autofocus aria-describedby="password-hint @error('password') password-error @enderror" @error('password') aria-invalid="true" @enderror>
+                        <p id="password-hint" class="hint">{{ __('pub_theme::auth.fields.password_hint') }}</p>
+                        @error('password')<p id="password-error" class="field__error" role="alert">{{ $message }}</p>@enderror
+                    </div>
+                    <div class="field">
+                        <label for="passwordConfirmation">{{ __('pub_theme::auth.fields.passwordConfirmation') }}</label>
+                        <input id="passwordConfirmation" type="password" wire:model="passwordConfirmation" autocomplete="new-password" required>
+                    </div>
+                    <button type="submit" class="button button--primary" wire:loading.attr="disabled">{{ __('pub_theme::auth.reset.submit') }}</button>
                 </form>
-                @endvolt
-            </div>
+            @endvolt
         </div>
-    </div>
+    </section>
 </x-layouts.main>

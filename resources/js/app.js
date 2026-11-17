@@ -9,7 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const setOpen = (open) => {
         menu.classList.toggle('is-open', open);
         toggle.setAttribute('aria-expanded', String(open));
-        if (label) label.textContent = open ? 'Chiudi il menu' : 'Apri il menu';
+        if (label) {
+            const text = open ? toggle.dataset.labelClose : toggle.dataset.labelOpen;
+            if (text) label.textContent = text;
+        }
         if (glyph) glyph.textContent = open ? '×' : '☰';
     };
 

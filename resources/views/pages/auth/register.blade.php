@@ -1,80 +1,86 @@
 <?php
 
-use App\Models\User;
+declare(strict_types=1);
+
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
-use Livewire\Attributes\Validate;
+use Modules\Xot\Datas\XotData;
+
 use function Laravel\Folio\{middleware, name};
 
+/*
+ * Registrazione dal sito (`/{lang}/auth/register`). Il modello utente e' quello del progetto
+ * (XotData, connessione `user`): prima si usava App\Models\User sulla connessione dei dati e
+ * l'unicita' dell'email veniva controllata sul database sbagliato.
+ */
 middleware(['guest']);
 name('register');
 
-new class extends Component
-{
-    #[Validate('required')]
-    public $name = '';
+new class extends Component {
+    public string $name = '';
 
-    #[Validate('required|email|unique:users')]
-    public $email = '';
+    public string $email = '';
 
-    #[Validate('required|min:8|same:passwordConfirmation')]
-    public $password = '';
+    public string $password = '';
 
-    #[Validate('required|min:8|same:password')]
-    public $passwordConfirmation = '';
+    public string $passwordConfirmation = '';
 
-    public function register()
+    /**
+     * @return array<string, mixed>
+     */
+    protected function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:191'],
+            'email' => ['required', 'email', 'max:191', Rule::unique(XotData::make()->getUserClass(), 'email')],
+            'password' => ['required', 'min:8', 'same:passwordConfirmation'],
+            'passwordConfirmation' => ['required'],
+        ];
+    }
+
+    public function register(): mixed
     {
         $this->validate();
 
-        $user = User::create([
-            'email' => $this->email,
+        $userClass = XotData::make()->getUserClass();
+        $user = new $userClass;
+        $user->forceFill([
             'name' => $this->name,
+            'email' => $this->email,
             'password' => Hash::make($this->password),
-        ]);
+        ])->save();
 
         event(new Registered($user));
-
         Auth::login($user, true);
+        session()->regenerate();
 
-        return redirect()->intended('/');
+        return redirect()->intended(url('/'.app()->getLocale()));
     }
 };
-
 ?>
-
 <x-layouts.main>
+    <section class="section auth">
+        <div class="container auth__container">
+            <p class="eyebrow">{{ __('pub_theme::auth.register.eyebrow') }}</p>
+            <h1>{{ __('pub_theme::auth.register.title') }}</h1>
+            <p class="lead">{{ __('pub_theme::auth.register.lead') }}</p>
 
-    <div class="flex flex-col items-stretch justify-center w-screen min-h-screen py-10 sm:items-center">
-
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <x-ui.link href="{{ route('home') }}">
-                <x-ui.logo class="w-auto h-10 mx-auto text-gray-700 fill-current dark:text-gray-100" />
-            </x-ui.link>
-            <h2 class="mt-5 text-2xl font-extrabold leading-9 text-center text-gray-800 dark:text-gray-200">Create a new
-                account</h2>
-            <div class="text-sm leading-5 text-center text-gray-600 dark:text-gray-400 space-x-0.5">
-                <span>Or</span>
-                <x-ui.text-link href="{{ route('login') }}">sign in to your account</x-ui.text-link>
-            </div>
-        </div>
-
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="px-10 py-0 sm:py-8 sm:shadow-sm sm:bg-white dark:sm:bg-gray-950/50 dark:border-gray-200/10 sm:border sm:rounded-lg border-gray-200/60">
-                @volt('auth.register')
-                <form wire:submit="register" class="space-y-6">
-                    <x-ui.input label="Name" type="text" id="name" name="name" wire:model="name" />
-                    <x-ui.input label="Email address" type="email" id="email" name="email" wire:model="email" />
-                    <x-ui.input label="Password" type="password" id="password" name="password" wire:model="password" />
-                    <x-ui.input label="Confirm Password" type="password" id="password_confirmation" name="password_confirmation" wire:model="passwordConfirmation" />
-                    <x-ui.button type="primary" rounded="md" submit="true">Register</x-ui.button>
+            @volt('auth.register')
+                <form wire:submit="register" class="form-card form-grid" novalidate>
+                    @foreach ([['name', 'text', 'name'], ['email', 'email', 'email'], ['password', 'password', 'new-password'], ['passwordConfirmation', 'password', 'new-password']] as [$field, $type, $autocomplete])
+                        <div class="field">
+                            <label for="{{ $field }}">{{ __('pub_theme::auth.fields.'.$field) }}</label>
+                            <input id="{{ $field }}" type="{{ $type }}" wire:model="{{ $field }}" autocomplete="{{ $autocomplete }}" required @error($field) aria-invalid="true" @enderror>
+                            @error($field)<p class="field__error" role="alert">{{ $message }}</p>@enderror
+                        </div>
+                    @endforeach
+                    <button type="submit" class="button button--primary" wire:loading.attr="disabled">{{ __('pub_theme::auth.register.submit') }}</button>
+                    <p class="auth__links"><a href="{{ route('login') }}">{{ __('pub_theme::auth.register.login') }}</a></p>
                 </form>
-                @endvolt
-            </div>
+            @endvolt
         </div>
-
-    </div>
-
+    </section>
 </x-layouts.main>

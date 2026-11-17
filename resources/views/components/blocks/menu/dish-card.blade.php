@@ -4,14 +4,14 @@
     $euCases = array_values(array_filter($allergens, static fn ($case) => ! in_array($case, \Modules\Restaurant\Enums\AllergenEnum::dietaryCases(), true)));
     $dietCases = array_values(array_filter($allergens, static fn ($case) => in_array($case, \Modules\Restaurant\Enums\AllergenEnum::dietaryCases(), true)));
     $ingredients = $product->relationLoaded('ingredients') ? $product->ingredients : collect();
-    $images = array_values(array_filter((array) ($product->images ?? [])));
+    $images = $product->imageUrls();
     $cover = $images[0] ?? null;
 @endphp
 <details class="dish">
     <summary class="dish__summary">
         <span class="dish__media">
             @if ($cover)
-                <img class="dish__photo" src="{{ asset('assets/Restaurant/'.ltrim((string) $cover, '/')) }}" alt="{{ $product->name }}" loading="lazy" decoding="async">
+                <img class="dish__photo" src="{{ $cover }}" alt="{{ $product->name }}" loading="lazy" decoding="async">
             @else
                 <span class="dish__photo dish__photo--empty" aria-hidden="true">@svg('restaurant-menu', 'dish__photo-icon', ['width' => 48, 'height' => 48])</span>
             @endif
@@ -51,7 +51,7 @@
         @if ($images !== [])
             <ul class="dish__gallery" aria-label="{{ __('restaurant::public_menu.dish.photos.label') }}">
                 @foreach (array_slice($images, 0, 3) as $image)
-                    <li><img src="{{ asset('assets/Restaurant/'.ltrim((string) $image, '/')) }}" alt="{{ $product->name }}" loading="lazy" decoding="async"></li>
+                    <li><img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy" decoding="async"></li>
                 @endforeach
             </ul>
         @endif

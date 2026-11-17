@@ -2,11 +2,11 @@
 id: trattoria-theme-docs
 slug: trattoria-theme
 title: Documentazione Tema Trattoria
-description: Guida completa al tema Trattoria per il progetto ristorante, inclusa palette colori, tipografia, configurazione Tailwind, immagini hero, footer e breakpoint responsive.
+description: Guida completa al tema Trattoria per il progetto ristorante, inclusa palette colori, tipografia, layout FO con Cms head/foot Filament, immagini hero, footer e breakpoint responsive.
 document_type: theme_documentation
 category: theme
 status: active
-version: 1.1.0
+version: 1.2.0
 language: it
 project: base_restaurant_fila5
 ecosystem: laravel
@@ -20,22 +20,17 @@ execution_mode: manual
 destructive_operations_allowed: false
 git_strategy: merge
 depends_on: []
-related: []
+related:
+  - ../../../Modules/Cms/docs/bmad/filament-layout-styles-scripts.md
 tags: [tema, trattoria, css]
 keywords: [tema, colori, tipografia, responsive]
-created_at: 2026-09-13
-updated_at: 2026-09-17
 maintainer: opencode
 license: MIT
 ---
 
 # Tema Trattoria
 
-> Aggiornato il 2026-09-17: la versione precedente di questa pagina descriveva
-> una palette e una configurazione Tailwind che non corrispondono al codice
-> realmente presente in `resources/`. I valori sotto sono verificati contro
-> `resources/css/app.css` e i componenti Blade in
-> `resources/views/components/`.
+> Sostituisce la copia con conflitti Git non risolti e la bozza palette non verificata. Valori sotto allineati a `resources/css/app.css` e ai Blade in `resources/views/`.
 
 ## Palette colori (custom properties in `resources/css/app.css`)
 
@@ -57,62 +52,24 @@ Import Google Fonts dichiarato in cima a `resources/css/app.css`:
 
 ## Stile CSS: classi semantiche, non utility Tailwind
 
-Il tema registra il plugin `@tailwindcss/vite` in `vite.config.js` (build
-pipeline disponibile), ma le viste Blade in `resources/views` **non** usano
-classi utility Tailwind: usano classi semantiche scritte a mano in
-`resources/css/app.css`, ad esempio `.hero`, `.section`, `.card`,
-`.menu-card`, `.mode-card`, `.form-card`, `.field`, `.button`,
-`.button--primary`/`.button--secondary`/`.button--ghost`. Prima di introdurre
-una nuova classe, verificare se esiste già in `app.css`.
+Il tema registra il plugin `@tailwindcss/vite` in `vite.config.js`, ma le viste Blade usano classi semantiche in `resources/css/app.css` (`.hero`, `.section`, `.card`, `.button`, …).
 
-Esempio reale (da `resources/views/pages/index.blade.php`):
+## Footer di contenuto vs foot di documento
 
-```blade
-<section class="hero">
-  <div class="container">
-    <p class="eyebrow">Cucina italiana contemporanea</p>
-    <h1>Il gusto di stare insieme.</h1>
-    <div class="actions">
-      <a class="button" href="{{ route('container0.index', ['container0' => 'menu']) }}">Scopri il menu</a>
-      <a class="button button--ghost" href="{{ route('container0.index', ['container0' => 'prenota']) }}">Prenota un tavolo</a>
-    </div>
-  </div>
-</section>
-```
-
-## Immagine Hero
-
-L'hero attuale è `public/images/hero.svg`, richiamata da CSS come sfondo con
-overlay in gradiente:
-
-```css
-.hero {
-  background: linear-gradient(110deg, rgba(87,35,19,.94), rgba(127,50,29,.76)),
-    url('/themes/trattoria/images/hero.svg') center/cover;
-}
-```
-
-## Footer
-
-Componente: `resources/views/components/footer.blade.php`.
-
-- Sfondo: `var(--terra-dark)` (`#572313`)
-- Testo: `#f9ead8` / `#ead8c7`
-- Heading (`.footer-heading`): `var(--saffron)`
+- Sezione CMS footer: componenti sezione tema
+- Fine documento: `<x-cms::foot />` (script Filament/Vite) — non confondere
 
 ## Breakpoint responsive
 
-Definiti come media query CSS "plain" in `app.css` (non prefissi Tailwind
-`sm:`/`lg:`), mobile-first:
+Media query plain in `app.css`, mobile-first: <640 / ≥640 / ≥1024.
 
-- Mobile: default, < 640px
-- Tablet: `@media (min-width: 640px)`
-- Desktop: `@media (min-width: 1024px)`
+## Layout FO e Filament (obbligatorio)
 
-## Layout condiviso
+`resources/views/components/layouts/main.blade.php` usa:
 
-Il layout base è `resources/views/components/layouts/app.blade.php`
-(`<x-layouts.app>`), che carica `@vite(['resources/css/app.css',
-'resources/js/app.js'], 'themes/Trattoria')` e include `<x-navigation />` e
-`<x-footer />`. Il toggle del menu mobile è gestito da
-`resources/js/app.js` tramite gli attributi `data-nav-toggle`/`data-nav-menu`.
+- `<x-cms::head />` → `@filamentStyles` (Cms)
+- `<x-cms::foot />` → `@livewire('notifications')` + `@filamentScripts` (Cms)
+
+Non rimuovere né duplicare. Contratto: [filament-layout-styles-scripts.md](../../../Modules/Cms/docs/bmad/filament-layout-styles-scripts.md) · [Filament 5 Configuring your layout](https://filamentphp.com/docs/5.x/introduction/installation#configuring-your-layout).
+
+Istruzione utente: obbligatorio `@filamentStyles` in Cms head e `@filamentScripts` in Cms foot; BMAD + ECC + second brain.

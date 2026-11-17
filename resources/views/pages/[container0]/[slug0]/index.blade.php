@@ -7,6 +7,7 @@ use function Laravel\Folio\name;
 use Livewire\Volt\Component;
 use Modules\Cms\Actions\ResolvePageAction;
 use Modules\Cms\Http\Middleware\PageSlugMiddleware;
+use Modules\Cms\Models\Page as PageModel;
 
 name('container0.view');
 middleware(PageSlugMiddleware::class);
@@ -28,17 +29,18 @@ new class extends Component {
 
         $resolved = app(ResolvePageAction::class)->execute($container0, $slug0);
 
+        // Pagina CMS inesistente (ne' `contenitore.slug` ne' `contenitore.view`): 404 invece di una pagina vuota.
+        abort_if($resolved->item === null && ! PageModel::query()->where('slug', $resolved->pageSlug)->exists(), 404);
+
         $this->pageSlug = $resolved->pageSlug;
 
         $item = $resolved->item;
-        $predictId = is_object($item) && isset($item->id) ? $item->id : null;
 
         $this->data = [
             'container0' => $container0,
             'slug0' => $slug0,
             'slug' => $slug0,
             'item' => $item,
-            'predictId' => $predictId,
         ];
     }
 };

@@ -1,21 +1,16 @@
 {{--
-    Pagina del tavolo raggiunta dal QR sul segnatavolo (`/{container0}/{slug0}` con slug0 = id tavolo).
-    Dati: GetTableQrOrderAction (modulo Restaurant). Tavolo sconosciuto -> 404.
+    Vecchio link del segnatavolo `/{lang}/table/{id}/qr` (pagina CMS `table.view`).
+    L'ordine al tavolo ora passa SOLO dal link firmato `/restaurants/{ristorante}/table/{id}/order`
+    (IssueTableOrderUrlAction). Questa pagina resta per i QR gia' stampati, ma non legge il database:
+    stessa risposta per qualsiasi id, cosi' non rivela quali tavoli esistono.
 --}}
-@php
-    $tableId = (int) request()->route('slug0');
-    $tableQrData = app(\Modules\Restaurant\Actions\Table\GetTableQrOrderAction::class)->execute($tableId);
-    abort_if($tableQrData === null, 404);
-@endphp
 <section class="section">
     <div class="container">
         <p class="eyebrow">{{ __('pub_theme::table_order.order_lead') }}</p>
-        <h1>{{ __('pub_theme::table_order.order_title', ['id' => $tableId]) }}</h1>
+        <h1>{{ __('pub_theme::table_order.legacy_title') }}</h1>
 
-        {{-- Nessun dettaglio dell'ordine aperto: l'id tavolo e' un intero pubblico (vedi story table-order-menu). --}}
-        <div class="card" style="margin:1rem 0"><p>{{ __('pub_theme::table_order.no_order') }}</p></div>
+        <div class="card" style="margin:1rem 0"><p>{{ __('pub_theme::table_order.legacy_text') }}</p></div>
 
         <p style="margin-top:1.5rem"><a class="button button--ghost" href="{{ route('home') }}">{{ __('pub_theme::table_order.back_home') }}</a></p>
-        <p class="hint">{{ __('pub_theme::table_order.footer_note') }}</p>
     </div>
 </section>

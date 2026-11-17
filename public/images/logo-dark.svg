@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 44" width="220" height="44" role="img" aria-label="Trattoria">
+  <circle cx="22" cy="22" r="20" fill="#7f321d"/><path d="M22 9 L25.2 18.8 L35 22 L25.2 25.2 L22 35 L18.8 25.2 L9 22 L18.8 18.8 Z" fill="#fff8ef"/>
+  <text x="52" y="24" font-family="'Playfair Display', Georgia, serif" font-size="21" font-weight="700" fill="#fff8ef">Trattoria</text>
+  <text x="53" y="38" font-family="'DM Sans', Arial, sans-serif" font-size="8.5" font-weight="600" letter-spacing="1.6" fill="#e7d2bd">CUCINA ITALIANA</text>
+</svg>

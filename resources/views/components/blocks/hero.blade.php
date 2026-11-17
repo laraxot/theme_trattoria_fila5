@@ -14,7 +14,8 @@
                     @foreach ($heroActions as $action)
                         @php
                             $variant = $action['variant'] ?? 'primary';
-                            $class = 'button'.($variant !== 'primary' ? ' button--'.$variant : '');
+                            // Ogni variante ha la sua classe: prima `primary` restava un pulsante senza sfondo.
+                            $class = 'button button--'.$variant;
                             $href = isset($action['route']) ? route($action['route'], $action['params'] ?? []) : ($action['url'] ?? '#');
                         @endphp
                         <a class="{{ $class }}" href="{{ $href }}">{{ $action['label'] ?? '' }}</a>
