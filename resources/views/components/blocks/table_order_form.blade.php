@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Livewire\Attributes\Locked;
 use Livewire\Volt\Component;
 use Modules\Restaurant\Actions\Menu\FindPublicRestaurantAction;
 use Modules\Restaurant\Actions\Menu\GetPublicMenuAction;
+use Modules\Restaurant\Actions\Order\ConfirmCustomerOrderAction;
 use Modules\Restaurant\Actions\Order\CreateCustomerOrderAction;
-use Modules\Restaurant\Actions\Order\SendOrderToStationsAction;
 use Modules\Restaurant\Actions\Table\IsTableOrderingEnabledAction;
 use Modules\Restaurant\Actions\Table\ResolveRestaurantTableAction;
 use Modules\Restaurant\Actions\Table\VerifyTableOrderRequestAction;
@@ -22,24 +23,9 @@ use Modules\Restaurant\Models\ProductModifier;
  * Ordinazione dal tavolo nel minisito ristorante
  * (`/{lang}/restaurants/{slug}/table/{num}/order`, pagina CMS `restaurants.table_order`).
  *
- * - Ristorante: `slug0` → FindPublicRestaurantAction (404 se sconosciuto).
- * - Tavolo: `slug1` → ResolveRestaurantTableAction, solo tra i tavoli di **quel** ristorante.
- * - Link del QR firmato (IssueTableOrderUrlAction) con `v` = versione del QR del tavolo:
- *   firma assente/errata, QR vecchio, tavolo o ristorante sconosciuti → sempre lo stesso 404.
- * - Ristorante, tavolo, menu e chiave di idempotenza sono #[Locked]: il browser non puo'
- *   cambiarli tra una richiesta Livewire e l'altra (prima si poteva cambiare `tableId`).
- * - Piatti esauriti (`is_available` false) non si offrono; se finiscono mentre il cliente
- *   ordina, messaggio chiaro invece di un errore.
- * - Ordini dal tavolo spenti per il ristorante (IsTableOrderingEnabledAction): il QR porta al menu
- *   pubblico `/menu/{slug}`; se vengono spenti mentre il cliente ordina, l'invio e' rifiutato.
- * - Al massimo 10 invii ogni 10 minuti per IP e tavolo.
- * - Menu: solo prodotti del tenant via GetPublicMenuAction; i modificatori
- *   arrivano da `product_modifiers` attivi del stesso prodotto.
- * - Carrello: qty + note libere + modificatori selezionati. `submit()` invia
- *   nomi di modificatori (mai price_delta dal client) e CreateCustomerOrderAction
- *   li rivalida sul catalogo. Poi SendOrderToStationsAction smista le righe su
- *   kitchen / bar / external_bar (print_station della categoria).
- * - `idempotencyKey` generata a mount: refresh/doppio submit non duplicano.
+ * Pipeline: CreateCustomerOrderAction → ConfirmCustomerOrderAction
+ * (stazioni + status sent + print fallback). Non chiamare SendOrderToStations
+ * direttamente dal tema: un solo percorso di conferma (API signed e Livewire).
  */
 new class extends Component {
     #[Locked]
@@ -87,7 +73,6 @@ new class extends Component {
         $table = app(ResolveRestaurantTableAction::class)->execute($restaurant, (string) request()->route('slug1', ''));
         abort_if($table === null || ! app(VerifyTableOrderRequestAction::class)->execute(request(), $table), 404);
 
-        // Ordini dal tavolo spenti: il QR resta valido e porta al menu del ristorante.
         if (! app(IsTableOrderingEnabledAction::class)->execute($restaurant)) {
             $this->redirect(route('container0.view', ['container0' => 'menu', 'slug0' => (string) $restaurant->getAttribute('slug')]));
 
@@ -133,7 +118,6 @@ new class extends Component {
             ];
         }
     }
-
 
     public function inc(int $productId): void
     {
@@ -232,26 +216,29 @@ new class extends Component {
                 $items,
                 (int) $this->covers,
             );
-        } catch (RestaurantException|InvalidArgumentException|ModelNotFoundException) {
-            // Piatto finito o ritirato mentre il cliente ordinava, o tavolo disattivato.
+
+            // Un solo percorso di conferma: stazioni + status sent + print fallback
+            $order = app(ConfirmCustomerOrderAction::class)->execute($this->tableId, $order->id);
+            $this->sentToStations = true;
+        } catch (RestaurantException|InvalidArgumentException|ModelNotFoundException $e) {
             $this->addError('order', __('pub_theme::table_order.unavailable'));
 
             return;
-        }
-
-        try {
-            app(SendOrderToStationsAction::class)->execute($order->id);
-            $this->sentToStations = true;
         } catch (\Throwable $e) {
-            // L'ordine e' salvato: lo staff lo vede e puo' rinviarlo. Al cliente niente dettagli tecnici.
+            // Ordine eventualmente creato ma confirm/stazioni falliti: staff può recuperare
             report($e);
             $this->sendWarning = __('pub_theme::table_order.send_failed_generic');
+            $this->sentToStations = false;
+            if (! isset($order)) {
+                $this->addError('order', __('pub_theme::table_order.unavailable'));
+
+                return;
+            }
         }
 
-        // Nuova chiave: un secondo giro d'ordine dallo stesso tavolo non e' un doppio invio.
         $this->idempotencyKey = 'qr-'.$this->tableId.'-'.Str::uuid()->toString();
 
-        $this->orderTotal = (float) $order->total;
+        $this->orderTotal = (float) ($order->total ?? 0);
         $this->sent = true;
         $this->cart = [];
         $this->cartLines = [];

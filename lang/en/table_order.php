@@ -12,6 +12,8 @@ return [
     'footer_note' => 'Shown via QR on the table sign.',
     'form_title' => 'Order at table :table',
     'form_lead' => 'Browse the menu, pick your dishes and send the order: it goes straight to the kitchen.',
+    'bar_count' => '{1} :count dish|[2,*] :count dishes',
+    'bar_cta' => 'Review and send',
     'cart_title' => 'Your order',
     'cart_empty' => 'Your cart is empty: tap + on the dishes you want.',
     'total_label' => 'Total',

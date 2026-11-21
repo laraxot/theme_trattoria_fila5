@@ -111,7 +111,7 @@ h1, h2, h3 { text-wrap: balance; } p { text-wrap: pretty; }
 
 /* Card piatto con foto: thumbnail in summary, gallery nel dettaglio */
 .dish__media { position: relative; display: block; }
-.dish__photo { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #f0e2d2; }
+.dish__photo { display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover; background: #f0e2d2; }
 .dish__photo--empty { display: grid; place-items: center; aspect-ratio: auto; height: 4.5rem; color: rgba(127,50,29,.45); background: repeating-linear-gradient(135deg, #f5e8d8 0 10px, #f0e0cc 10px 20px); }
 .dish__price { position: absolute; right: .6rem; bottom: .6rem; padding: .2rem .6rem; border-radius: 999px; background: rgba(87,35,19,.92); color: #fff8ef; font-weight: 700; font-size: .85rem; }
 .dish__head { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; }
@@ -204,7 +204,7 @@ h1, h2, h3 { text-wrap: balance; } p { text-wrap: pretty; }
 @media (min-width: 768px) { .site-header .site-nav { order: 1; margin-left: auto; } .site-header .lang-menu, .site-header .lang-switch { order: 2; margin-left: 0; } }
 
 /* Audit ispirazione award-site: hero fotografico, path fotografico nel dettaglio */
-.menu-hero { position: relative; padding: clamp(1.6rem, 4.5vw, 2.6rem); border-radius: var(--radius); overflow: hidden; background: linear-gradient(105deg, rgba(87,35,19,.93) 20%, rgba(127,50,29,.72) 70%, rgba(127,50,29,.45)), url('/assets/restaurant/menu/bistecca-fiorentina-1.jpg') center/cover; color: #fff8ef; }
+.menu-hero { position: relative; padding: clamp(1.6rem, 4.5vw, 2.6rem); border-radius: var(--radius); overflow: hidden; background: linear-gradient(105deg, rgba(87,35,19,.93) 20%, rgba(127,50,29,.72) 70%, rgba(127,50,29,.45)), url('/assets/restaurant/menu/hero-sfondo.jpg') center/cover; color: #fff8ef; }
 .menu-hero .eyebrow { color: #f4d9a9; }
 .menu-hero h1 { color: #fff8ef; }
 .menu-hero .lead { color: #f8e5d1; }
@@ -409,3 +409,36 @@ html { scroll-behavior: smooth; }
     .hero-preview__qr-icon { width: 1.75rem; height: 1.75rem; border-radius: .3rem; background: conic-gradient(var(--terra-dark) 25%, transparent 0 50%, var(--terra-dark) 0 75%, transparent 0) 0 0 / .58rem .58rem, var(--cream); border: 2px solid var(--terra-dark); }
 }
 @media (prefers-reduced-motion: reduce) { .hero-preview { transform: none; } }
+
+/* Header su telefono: tutto su una riga, hamburger sempre visibile. Sotto 560px via il motto, nome piu' piccolo,
+   "Accedi" solo icona (il testo resta per gli screen reader), selettore lingua compatto. */
+@media (max-width: 559px) {
+  .site-header__inner { gap: .5rem; min-height: 4rem; }
+  .site-header .brand { flex: 1 1 auto; min-width: 0; }
+  .site-header .brand > span:last-child, .site-header .brand strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .site-header .brand strong { font-size: 1.05rem; }
+  .site-header .brand small { display: none; }
+  .site-header .lang-menu { margin-left: 0; }
+  .site-header .lang-menu__trigger, .site-header .lang-switch__toggle { padding: 0 .55rem; gap: .3rem; }
+  .user-login { padding: 0; width: 2.75rem; justify-content: center; }
+  .user-login__label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .site-nav { inset: 4rem 0 auto; }
+  .menu-nav { top: 4rem; }
+}
+
+/* Ordine al tavolo su telefono: hero compatto, carrello vuoto nascosto (basta il + sui piatti),
+   barra fissa in basso con piatti e totale che riporta al carrello. */
+.table-order__bar { display: none; }
+#order-cart { scroll-margin-top: 5rem; }
+@media (max-width: 900px) {
+  .table-order__cart--empty { display: none; }
+  .table-order__cart .button { width: 100%; justify-content: center; min-height: 3.25rem; }
+  .table-order__bar { position: fixed; z-index: 30; left: .75rem; right: .75rem; bottom: calc(.75rem + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; justify-content: space-between; gap: .75rem; min-height: 3.25rem; padding: .6rem 1rem; border-radius: 999px; background: var(--terra-dark); color: #fff8ef; box-shadow: 0 10px 30px rgba(87,35,19,.35); text-decoration: none; font-size: .95rem; }
+  .table-order__bar-cta { font-weight: 700; color: var(--saffron); white-space: nowrap; }
+  .table-order-page { padding-bottom: 5rem; }
+}
+@media (max-width: 559px) {
+  .menu-hero { padding: 1.1rem 1.15rem; }
+  .menu-hero h1 { font-size: 1.75rem; margin: .2rem 0 .3rem; }
+  .menu-hero .lead { font-size: .95rem; margin: 0; }
+}
