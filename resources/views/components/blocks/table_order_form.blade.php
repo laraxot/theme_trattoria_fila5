@@ -331,7 +331,7 @@ new class extends Component {
                             <article class="dish dish--order">
                                 <div class="dish__media">
                                     @if ($dish['images'] !== [])
-                                        <img class="dish__photo" src="{{ $dish['images'][0] }}" alt="{{ $dish['name'] }}" loading="lazy">
+                                        <img class="dish__photo" src="{{ $dish['images'][0] }}" alt="{{ $dish['name'] }}" width="960" height="720" decoding="async" @if ($loop->index < 2) fetchpriority="high" @else loading="lazy" @endif>
                                     @else
                                         <span class="dish__photo dish__photo--empty" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M17 21V3c-2 1.5-3 4-3 7v3h3"/></svg></span>
                                     @endif
@@ -367,7 +367,7 @@ new class extends Component {
                         @endforeach
                     </div>
 
-                    <aside class="card table-order__cart" aria-live="polite">
+                    <aside id="order-cart" @class(['card', 'table-order__cart', 'table-order__cart--empty' => $cartLines === []]) aria-live="polite">
                         <h2 class="restaurant-home__card-title">{{ __('pub_theme::table_order.cart_title') }}</h2>
                         @if ($cartLines === [])
                             <p class="hint">{{ __('pub_theme::table_order.cart_empty') }}</p>
@@ -391,6 +391,14 @@ new class extends Component {
                         @endif
                     </aside>
                 </div>
+                {{-- Telefono: il carrello sta in cima alla pagina; mentre si scorre il menu questa barra in basso
+                     mostra piatti e totale e con un tocco ci riporta al carrello per inviare l'ordine. --}}
+                @if ($cartLines !== [])
+                    <a class="table-order__bar" href="#order-cart">
+                        <span>{{ trans_choice('pub_theme::table_order.bar_count', array_sum(array_column($cartLines, 'qty')), ['count' => array_sum(array_column($cartLines, 'qty'))]) }} · <strong>{{ Number::currency(array_sum(array_column($cartLines, 'total')), 'EUR', app()->getLocale()) }}</strong></span>
+                        <span class="table-order__bar-cta">{{ __('pub_theme::table_order.bar_cta') }} →</span>
+                    </a>
+                @endif
             @endif
         </div>
         @endvolt
